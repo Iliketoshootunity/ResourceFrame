@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Xml.Serialization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEditor;
 
 public class XMLMono : MonoBehaviour
 {
@@ -11,19 +12,55 @@ public class XMLMono : MonoBehaviour
     void Start()
     {
         //TestSerilize();
-        TestBianry();
-        TestSerilize tt = TestBianryDeserilize();
-        Debug.Log(tt.Id);
-        Debug.Log(tt.Name);
-        for (int i = 0; i < tt.List.Count; i++)
-        {
-            Debug.Log(tt.List[i]);
-        }
+        //TestBianry();
+        //TestSerilize tt = TestBianryDeserilize();
+        //Debug.Log(tt.Id);
+        //Debug.Log(tt.Name);
+        //for (int i = 0; i < tt.List.Count; i++)
+        //{
+        //    Debug.Log(tt.List[i]);
+        //}
+
+        TestLoadAssetBundle();
     }
 
     // Update is called once per frame
     void Update()
     {
+
+    }
+
+    public void TestLoadAssetBundle()
+    {
+        AssetBundle configAb = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + "data");
+        TextAsset textAssed = configAb.LoadAsset<TextAsset>("AssetBundleConfig.bytes");
+        MemoryStream ms = new MemoryStream(textAssed.bytes);
+        BinaryFormatter bf = new BinaryFormatter();
+        AssetBundleConfig test = (AssetBundleConfig)bf.Deserialize(ms);
+        ms.Close();
+        string path = "Assets/GameData/Prefab/Attack.prefab";
+        uint crc = Crc32.GetCrc32(path);
+        if (test != null)
+        {
+            BaseAB baseAB = null;
+            for (int i = 0; i < test.ABList.Count; i++)
+            {
+                if (test.ABList[i].Crc == crc)
+                {
+                    baseAB = test.ABList[i];
+                }
+            }
+
+            for (int i = 0; i < baseAB.Depends.Count; i++)
+            {
+                AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + baseAB.Depends[i]);
+            }
+            AssetBundle ab = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + baseAB.ABName);
+            if (ab)
+            {
+                GameObject go = GameObject.Instantiate(ab.LoadAsset<GameObject>(baseAB.AssetName));
+            }
+        }
 
     }
 

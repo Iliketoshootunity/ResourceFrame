@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AssetBundleConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ABList AssetName="Attack.prefab" ABName="attack" Crc="2909348197" path="Assets/GameData/Prefab/Attack.prefab">
+    <Depends>shaders</Depends>
+  </ABList>
+  <ABList AssetName="AssetBundleConfig.bytes" ABName="data" Crc="4111725031" path="Assets/GameData/Data/AssetBundleConfig.bytes" />
+  <ABList AssetName="GG.prefab" ABName="gg" Crc="906200589" path="Assets/GameData/Prefab/GG.prefab">
+    <Depends>attack</Depends>
+    <Depends>shaders</Depends>
+  </ABList>
+  <ABList AssetName="benghuai.shader" ABName="shaders" Crc="2153760648" path="Assets/GameData/Shaders/benghuai.shader" />
+  <ABList AssetName="Skybox.shader" ABName="shaders" Crc="2040549738" path="Assets/GameData/Shaders/Skybox.shader" />
+  <ABList AssetName="Water.shader" ABName="shaders" Crc="3794094069" path="Assets/GameData/Shaders/Water.shader" />
+  <ABList AssetName="Xray.shader" ABName="shaders" Crc="2720758644" path="Assets/GameData/Shaders/Xray.shader" />
+  <ABList AssetName="menusound.mp3" ABName="sounds" Crc="1701716301" path="Assets/GameData/Sounds/menusound.mp3" />
+  <ABList AssetName="senlin.mp3" ABName="sounds" Crc="662225670" path="Assets/GameData/Sounds/senlin.mp3" />
+</AssetBundleConfig>
