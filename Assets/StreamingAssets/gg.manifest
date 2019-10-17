@@ -1,19 +1,33 @@
 ManifestFileVersion: 0
-CRC: 3952520941
+CRC: 2176405482
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 88951f198403f0a4669d989da12d4343
+    Hash: c9d28b3d84570d3ef33ae370396130b4
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 0a9d000c67bb3b371a8c4e0fe8b14a8f
+    Hash: 24d9baa0928cdc7610e1bc16d70f65c4
 HashAppended: 0
 ClassTypes:
 - Class: 1
   Script: {instanceID: 0}
 - Class: 4
   Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
 Assets:
 - Assets/GameData/Prefab/GG.prefab
 Dependencies:
-- D:/MyWorkSpace/Unity/ResourceFrame/Assets/StreamingAssets/attack
+- H:/UnityWorkSpace/ResourceFrame/Assets/StreamingAssets/attack

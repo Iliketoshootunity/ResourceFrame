@@ -202,11 +202,5 @@ public class ResourceItem
 
     //引用计数，当引用计数为0时，可以选择卸载掉这个资源（将所在的AssetBundleItem 的引用计数减-，当将所在的AssetBundleItem 引用计数为0时，会卸载该资源所在的AB包）
     public int RefCount;
-    //资源实体
-    public UnityEngine.Object AssetObj;
-    //GUID
-    public long GUID;
-    //最后使用时间
-    public float LastUseTime;
 }
 
