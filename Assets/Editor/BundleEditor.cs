@@ -179,6 +179,7 @@ public class BundleEditor
             }
             if (File.Exists(fileIfos[i].FullName))
             {
+                Debug.Log(fileIfos[i].FullName + "已经改名");
                 File.Delete(fileIfos[i].FullName);
             }
         }

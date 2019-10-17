@@ -40,7 +40,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             Debug.LogError("AssetBundleConfig 反序列化失败 ");
             return false;
         }
-        //存储所有的AB信息
+        //存储所有的AssetBundle资源信息
         for (int i = 0; i < config.ABList.Count; i++)
         {
             BaseAB baseAB = config.ABList[i];
@@ -147,7 +147,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             }
             m_ABNameCrcToAssetBundleItem.Add(crc, item);
         }
-        item.ReferenceCount++;
+        item.RefCount++;
         return item.AssetBundle;
     }
 
@@ -157,9 +157,9 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
         uint crc = Crc32.GetCrc32(name);
         if (m_ABNameCrcToAssetBundleItem.TryGetValue(crc, out item) && item != null)
         {
-            item.ReferenceCount--;
+            item.RefCount--;
             //引用计数清空，彻底卸载掉这个资源
-            if (item.ReferenceCount <= 0 && item.AssetBundle != null)
+            if (item.RefCount <= 0 && item.AssetBundle != null)
             {
                 item.AssetBundle.Unload(false);
                 item.Reset();
@@ -174,24 +174,33 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
 
 public class AssetBundleItem
 {
+    //AssetBundle
     public AssetBundle AssetBundle;
-    //引用技术，单ReferenceCount==0时，可选择卸载掉这个资源
-    public int ReferenceCount;
+    //AssetBundle引用计数，单ReferenceCount==0时，卸载掉这个资源
+    public int RefCount;
 
     public void Reset()
     {
         AssetBundle = null;
-        ReferenceCount = 0;
+        RefCount = 0;
     }
 }
 
 public class ResourceItem
 {
+    //该资源名字
     public string AssetName = string.Empty;
+    //该资源所在AB包的名字
     public string ABName = string.Empty;
+    //该资源的crc
     public uint Crc = 0;
-    public string Path = string.Empty;
+    //该资源的依赖的AB包
     public List<string> Depends = null;
+    //该资源所在的AB包
     public AssetBundle AssetBundle = null;
+
+
+    //引用计数，当引用计数为0时，可以选择卸载掉这个资源（将所在的AssetBundleItem 的引用计数减-，当将所在的AssetBundleItem 引用计数为0时，会卸载该资源所在的AB包）
+    public int RefCount;
 }
 

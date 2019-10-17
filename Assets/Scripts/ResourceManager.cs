@@ -181,5 +181,83 @@ public class DoubleLinkedList<T> where T : class, new()
 
 public class CMapList<T> where T : class, new()
 {
+    protected DoubleLinkedList<T> m_DoubleLinkedList = new DoubleLinkedList<T>();
+    protected Dictionary<T, DoubleLinkedListNode<T>> m_ContentToNode = new Dictionary<T, DoubleLinkedListNode<T>>();
+
+
+
+    public void Clear()
+    {
+        for (int i = 0; i < m_ContentToNode.Count; i++)
+        {
+            m_DoubleLinkedList.RemoveNode(m_DoubleLinkedList.Tail);
+        }
+    }
+
+    public void InsertToHead(T t)
+    {
+        if (t == null) return;
+        DoubleLinkedListNode<T> node = null;
+        if (m_ContentToNode.TryGetValue(t, out node) && node != null)
+        {
+            m_DoubleLinkedList.AddToHead(t);
+            return;
+        }
+        node = m_DoubleLinkedList.AddToHead(t);
+        m_ContentToNode.Add(t, node);
+    }
+
+    public void Pop()
+    {
+        if (m_DoubleLinkedList.Tail != null)
+        {
+            Remove(m_DoubleLinkedList.Tail.Content);
+        }
+    }
+
+    public void Remove(T t)
+    {
+        if (t == null) return;
+        DoubleLinkedListNode<T> node = null;
+        if (m_ContentToNode.TryGetValue(t, out node) && node != null)
+        {
+            m_DoubleLinkedList.RemoveNode(node);
+            m_ContentToNode.Remove(t);
+        }
+    }
+
+    public int Size()
+    {
+        return m_ContentToNode.Count;
+    }
+    /// <summary>
+    /// 获取尾部的内容
+    /// </summary>
+    /// <returns></returns>
+    public T Back()
+    {
+        return m_DoubleLinkedList.Tail == null ? null : m_DoubleLinkedList.Tail.Content;
+    }
+
+    public bool Find(T t)
+    {
+        if (t == null) return false;
+        DoubleLinkedListNode<T> node = null;
+        if (m_ContentToNode.TryGetValue(t, out node) && node != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void Refresh(T t)
+    {
+        if (t == null) return;
+        DoubleLinkedListNode<T> node = null;
+        if (m_ContentToNode.TryGetValue(t, out node) && node != null)
+        {
+            m_DoubleLinkedList.MoveToHead(node);
+        }
+    }
 
 }

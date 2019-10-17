@@ -62,9 +62,11 @@
   <ItemGroup>
     <Compile Include="Assets\GameData\Modle\benghuai\AutoRotation.cs" />
     <Compile Include="Assets\Scripts\AssetBundleConfig.cs" />
+    <Compile Include="Assets\Scripts\AssetBundleManager.cs" />
     <Compile Include="Assets\Scripts\ClassObjectPool.cs" />
     <Compile Include="Assets\Scripts\CRC32.cs" />
     <Compile Include="Assets\Scripts\ObjectManager.cs" />
+    <Compile Include="Assets\Scripts\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\SerilizeDemo\TestSerilize.cs" />
     <Compile Include="Assets\Scripts\SerilizeDemo\XMLMono.cs" />
     <Compile Include="Assets\Scripts\Singleton.cs" />
