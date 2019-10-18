@@ -2,6 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public delegate void OnAysncLoadAssetFinishedDelegate(UnityEngine.Object param1, UnityEngine.Object parem2, UnityEngine.Object parem3);
+
+public class AsyncLoadAssetParam
+{
+    public List<AsyncLoadAssetDelegate> m_EndDelegate;
+}
+
+public class AsyncLoadAssetDelegate
+{
+    //public
+}
+
 public class ResourceManager : Singleton<ResourceManager>
 {
     protected bool m_LoadAssetBundleFromEditor = false;
@@ -11,6 +23,14 @@ public class ResourceManager : Singleton<ResourceManager>
 
     protected CMapList<ResourceItem> m_NoRefreceAssetMapList = new CMapList<ResourceItem>();
 
+
+    protected MonoBehaviour m_StartMono;
+
+    public void Init(MonoBehaviour startMono)
+    {
+        m_StartMono = startMono;
+
+    }
 
     //最大缓存个数
     private const int MAXCACHECOUNT = 500;
