@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\AssetBundleManager.cs" />
     <Compile Include="Assets\Scripts\ClassObjectPool.cs" />
     <Compile Include="Assets\Scripts\CRC32.cs" />
+    <Compile Include="Assets\Scripts\GameStart.cs" />
     <Compile Include="Assets\Scripts\ObjectManager.cs" />
     <Compile Include="Assets\Scripts\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\SerilizeDemo\TestSerilize.cs" />

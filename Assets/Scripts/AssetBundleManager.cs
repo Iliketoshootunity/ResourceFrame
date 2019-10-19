@@ -17,7 +17,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// <summary>
     /// AssetBundleItem类对象池
     /// </summary>
-    protected ClassObjectPool<AssetBundleItem> m_AssetBundleItemPool = ObjectManager.GetInstance().GetOrCreateClassObjectPool<AssetBundleItem>(500);
+    protected ClassObjectPool<AssetBundleItem> m_AssetBundleItemPool = ObjectManager.Instance.GetOrCreateClassObjectPool<AssetBundleItem>(500);
     /// <summary>
     /// 加载AssetBundle config
     /// </summary>

@@ -6,12 +6,15 @@ public class Singleton<T> where T : new()
 {
     private static T m_Instance;
 
-    public static T GetInstance()
+    public static T Instance
     {
-        if (m_Instance == null)
+        get
         {
-            m_Instance = new T();
+            if (m_Instance == null)
+            {
+                m_Instance = new T();
+            }
+            return m_Instance;
         }
-        return m_Instance;
     }
 }

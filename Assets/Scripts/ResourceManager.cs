@@ -51,7 +51,7 @@ public class ResourceManager : Singleton<ResourceManager>
 #if UNITY_EDITOR
         if (m_LoadAssetBundleFromEditor)
         {
-            item = AssetBundleManager.GetInstance().FindResourceItem(crc);
+            item = AssetBundleManager.Instance.FindResourceItem(crc);
             if (item.AssetObj == null)
             {
                 item.AssetObj = LoadAssetFromEditor<T>(path);
@@ -64,7 +64,7 @@ public class ResourceManager : Singleton<ResourceManager>
 #endif
         if (obj == null)
         {
-            item = AssetBundleManager.GetInstance().LoadResourceItem(crc);
+            item = AssetBundleManager.Instance.LoadResourceItem(crc);
             if (item != null && item.AssetName != null)
             {
                 if (item.AssetObj)
@@ -257,7 +257,7 @@ public class DoubleLinkedList<T> where T : class, new()
     public DoubleLinkedListNode<T> Head;
     public DoubleLinkedListNode<T> Tail;
 
-    protected ClassObjectPool<DoubleLinkedListNode<T>> NodePool = ObjectManager.GetInstance().GetOrCreateClassObjectPool<DoubleLinkedListNode<T>>(500);
+    protected ClassObjectPool<DoubleLinkedListNode<T>> NodePool = ObjectManager.Instance.GetOrCreateClassObjectPool<DoubleLinkedListNode<T>>(500);
 
     protected int m_Count;
 

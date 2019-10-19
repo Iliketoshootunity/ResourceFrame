@@ -5,7 +5,7 @@ using UnityEngine;
 public class ClassObjectPool<T> where T : class, new()
 {
     //池
-    protected Stack<T> m_Pool;
+    protected Stack<T> m_Pool = new Stack<T>();
     //最大限制数量，如果为<=0,则表示可以无限存放
     protected int m_MaxCount;
     //当前未回收的数量
