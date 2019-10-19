@@ -7,13 +7,13 @@ using UnityEngine;
 public class AssetBundleManager : Singleton<AssetBundleManager>
 {
     /// <summary>
-    /// 资源依赖关系表
+    /// 资源依赖关系表 Key 是path的crc value是ResourceItem 
     /// </summary>
-    protected Dictionary<uint, ResourceItem> m_PathCrcToResourceItem = new Dictionary<uint, ResourceItem>();
+    protected Dictionary<uint, ResourceItem> m_ResourceItemDic = new Dictionary<uint, ResourceItem>();
     /// <summary>
-    /// 存储已经加载的AssetBundle
+    /// 存储已经加载的AssetBundle key 是AB Name的Crc, Value 是AssetBundleItem
     /// </summary>
-    protected Dictionary<uint, AssetBundleItem> m_ABNameCrcToAssetBundleItem = new Dictionary<uint, AssetBundleItem>();
+    protected Dictionary<uint, AssetBundleItem> m_AssetBundleItemDic = new Dictionary<uint, AssetBundleItem>();
     /// <summary>
     /// AssetBundleItem类对象池
     /// </summary>
@@ -51,7 +51,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             resourceItem.Crc = baseAB.Crc;
             resourceItem.Depends = baseAB.Depends;
             resourceItem.AssetBundle = null;
-            m_PathCrcToResourceItem.Add(resourceItem.Crc, resourceItem);
+            m_ResourceItemDic.Add(resourceItem.Crc, resourceItem);
         }
         return true;
     }
@@ -64,7 +64,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     public ResourceItem LoadResourceItem(uint pathCrc)
     {
         ResourceItem item = null;
-        if (!m_PathCrcToResourceItem.TryGetValue(pathCrc, out item) || item == null)
+        if (!m_ResourceItemDic.TryGetValue(pathCrc, out item) || item == null)
         {
             Debug.LogError("存储的AB信息中未有此项");
             return null;
@@ -122,7 +122,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// <returns></returns>
     public ResourceItem FindResourceItem(uint pathCrc)
     {
-        return m_PathCrcToResourceItem[pathCrc];
+        return m_ResourceItemDic[pathCrc];
     }
 
 
@@ -130,22 +130,22 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// <summary>
     /// 根据AB包名加载AssetBundle 
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="abName"></param>
     /// <returns></returns>
-    private AssetBundle LoadAssetBundle(string name)
+    private AssetBundle LoadAssetBundle(string abName)
     {
         AssetBundleItem item = null;
-        uint crc = Crc32.GetCrc32(name);
-        if (!m_ABNameCrcToAssetBundleItem.TryGetValue(crc, out item))
+        uint crc = Crc32.GetCrc32(abName);
+        if (!m_AssetBundleItemDic.TryGetValue(crc, out item))
         {
             item = m_AssetBundleItemPool.Spawn(true);
-            item.AssetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + name);                     //测试路径
+            item.AssetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + abName);                     //测试路径
             if (item.AssetBundle == null)
             {
                 Debug.LogError("未能正确加载AssetBundle,请检查！！！！！");
 
             }
-            m_ABNameCrcToAssetBundleItem.Add(crc, item);
+            m_AssetBundleItemDic.Add(crc, item);
         }
         item.RefCount++;
         return item.AssetBundle;
@@ -155,7 +155,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     {
         AssetBundleItem item = null;
         uint crc = Crc32.GetCrc32(name);
-        if (m_ABNameCrcToAssetBundleItem.TryGetValue(crc, out item) && item != null)
+        if (m_AssetBundleItemDic.TryGetValue(crc, out item) && item != null)
         {
             item.RefCount--;
             //引用计数清空，彻底卸载掉这个资源
@@ -164,7 +164,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
                 item.AssetBundle.Unload(false);
                 item.Reset();
                 m_AssetBundleItemPool.Recycle(item);
-                m_ABNameCrcToAssetBundleItem.Remove(crc);
+                m_AssetBundleItemDic.Remove(crc);
             }
         }
     }

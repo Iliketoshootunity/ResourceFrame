@@ -11,20 +11,40 @@ public class GameStart : MonoBehaviour
     void Start()
     {
         AssetBundleManager.Instance.LoadAssetBundleConfig();
+        ResourceManager.Instance.Init(this);
         string path = "Assets/GameData/Sounds/senlin.mp3";
-        AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
-        AS.clip = AC;
-        AS.Play();
+        //AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
+        //AS.clip = AC;
+        //AS.Play();
+        //StartCoroutine(Test());
+
+        ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
     }
+
+
 
     // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            ResourceManager.Instance.ReleseResourceItem(AC);
+            ResourceManager.Instance.ReleseResourceItem(AC, true);
             AS.clip = null;
             AC = null;
         }
     }
+
+
+    public void TestCallBack(string path, Object obj, object param1 = null, object param2 = null, object param3 = null)
+    {
+        AS.clip = (AudioClip)obj;
+        AC = AS.clip;
+    }
+
+
+}
+
+public class AA : StateMachineBehaviour
+{
+
 }

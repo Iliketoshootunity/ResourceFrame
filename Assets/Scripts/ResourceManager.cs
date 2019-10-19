@@ -2,38 +2,98 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public delegate void OnAysncLoadAssetFinishedDelegate(UnityEngine.Object param1, UnityEngine.Object parem2, UnityEngine.Object parem3);
+//异步加载不需要实例化的资源的回调
+public delegate void OnAsyncObjFinsih(string path, Object obj, object param1 = null, object param2 = null, object param3 = null);
 
-public class AsyncLoadAssetParam
+
+/// <summary>
+/// 异步加载优先级的枚举
+/// </summary>
+public enum EAysncLoadPriority
 {
-    public List<AsyncLoadAssetDelegate> m_EndDelegate;
+    Hight = 0,
+    Midddle,
+    Slow,
+    Number
 }
 
-public class AsyncLoadAssetDelegate
+/// <summary>
+///  异步加载加载的参数，在协程种一个个读取信息，进行真正的加载
+/// </summary>
+public class AsyncLoadAssetParam
 {
-    //public
+    public List<AsyncCallBack> CallBackList = new List<AsyncCallBack>();
+    public uint Crc;
+    public string Path;
+    public EAysncLoadPriority Priority = EAysncLoadPriority.Slow;
+
+    public void Reset()
+    {
+        CallBackList.Clear();
+        Crc = 0;
+        Path = "";
+        Priority = EAysncLoadPriority.Slow;
+    }
+}
+
+/// <summary>
+/// 异步加载回调的封装
+/// </summary>
+public class AsyncCallBack
+{
+    public OnAsyncObjFinsih OnAsyncLoadFinished;
+    public UnityEngine.Object Param1, Param2, Param3;
+
+    public void Reset()
+    {
+        OnAsyncLoadFinished = null;
+        Param1 = null;
+        Param2 = null;
+        Param3 = null;
+    }
+
 }
 
 public class ResourceManager : Singleton<ResourceManager>
 {
-    protected bool m_LoadAssetBundleFromEditor = false;
+    protected bool m_LoadAssetFormEditor = false;
 
-    //缓存的资源
+    //缓存的资源 key是path crc value 是ResourceItem
     public Dictionary<uint, ResourceItem> AssetDic = new Dictionary<uint, ResourceItem>();
-
+    //缓存引用计数为零的资源列表，达到缓存最大的时候释放这个列表里面最早没用的资源
     protected CMapList<ResourceItem> m_NoRefreceAssetMapList = new CMapList<ResourceItem>();
 
+    //正在加载的资源(根据优先级)
+    protected List<AsyncLoadAssetParam>[] m_LoadingAssetArray;
+    //正在加载的资源 key是path crc value AsyncLoadAssetParam
+    protected Dictionary<uint, AsyncLoadAssetParam> m_LoadingAssetDic = new Dictionary<uint, AsyncLoadAssetParam>();
+    //AsyncLoadAssetParam池
+    protected ClassObjectPool<AsyncLoadAssetParam> m_AsyncLoadAssetParamPool = new ClassObjectPool<AsyncLoadAssetParam>(50);
+    //AsyncCallBack池
+    protected ClassObjectPool<AsyncCallBack> m_AsyncCallBackPool = new ClassObjectPool<AsyncCallBack>(100);
 
     protected MonoBehaviour m_StartMono;
+
+    //最长连续卡着加载资源的时间，单位微妙
+    private const long MAXLOADRESTIME = 200000;
+
+    //最大缓存个数
+    private const int MAXCACHECOUNT = 500;
 
     public void Init(MonoBehaviour startMono)
     {
         m_StartMono = startMono;
+        m_LoadingAssetArray = new List<AsyncLoadAssetParam>[(int)EAysncLoadPriority.Number];
+        for (int i = 0; i < (int)EAysncLoadPriority.Number; i++)
+        {
+            List<AsyncLoadAssetParam> temp = new List<AsyncLoadAssetParam>();
+            m_LoadingAssetArray[i] = temp;
+        }
 
+        startMono.StartCoroutine(IEAsyncLoadAsset());
     }
 
-    //最大缓存个数
-    private const int MAXCACHECOUNT = 500;
+
     /// <summary>
     /// 加载无须实例化的资源，比如说声音片段，图片等等
     /// </summary>
@@ -49,7 +109,7 @@ public class ResourceManager : Singleton<ResourceManager>
         }
         UnityEngine.Object obj = null;
 #if UNITY_EDITOR
-        if (m_LoadAssetBundleFromEditor)
+        if (m_LoadAssetFormEditor)
         {
             item = AssetBundleManager.Instance.FindResourceItem(crc);
             if (item.AssetObj == null)
@@ -79,6 +139,147 @@ public class ResourceManager : Singleton<ResourceManager>
         }
         CacheResourceItem(path, ref item, crc, obj);
         return obj as T;
+    }
+    /// <summary>
+    /// 异步加载不需要实例化的资源
+    /// </summary>
+    /// <param name="path"></param>
+    public void AsyncLoadAsset(string path, EAysncLoadPriority loadPriority, OnAsyncObjFinsih finishCallBack, Object parem1 = null, Object parem2 = null, Object parem3 = null, uint crc = 0)
+    {
+        if (crc == 0)
+        {
+            crc = Crc32.GetCrc32(path);
+        }
+        //已经在缓存内
+        ResourceItem item = GetCacheResourceItem(crc);
+        if (item != null)
+        {
+            if (finishCallBack != null)
+            {
+                finishCallBack(path, item.AssetObj, parem1, parem2, parem3);
+                return;
+            }
+        }
+        //是否在正在加载的队列种
+        AsyncLoadAssetParam loadingAsset = null;
+        if (!m_LoadingAssetDic.TryGetValue(crc, out loadingAsset) && loadingAsset == null)
+        {
+            loadingAsset = m_AsyncLoadAssetParamPool.Spawn(true);
+            loadingAsset.Crc = crc;
+            loadingAsset.Path = path;
+            loadingAsset.Priority = loadPriority;
+        }
+        //添加回调
+        AsyncCallBack callBack = m_AsyncCallBackPool.Spawn(true);
+        callBack.OnAsyncLoadFinished = finishCallBack;
+        callBack.Param1 = parem1;
+        callBack.Param2 = parem2;
+        callBack.Param3 = parem3;
+        loadingAsset.CallBackList.Add(callBack);
+        m_LoadingAssetArray[(int)loadPriority].Add(loadingAsset);
+        m_LoadingAssetDic.Add(crc, loadingAsset);
+    }
+
+    /// <summary>
+    /// 异步加载资源协程
+    /// </summary>
+    /// <returns></returns>
+    protected IEnumerator IEAsyncLoadAsset()
+    {
+        long lastYieldTime = System.DateTime.Now.Ticks;
+        while (true)
+        {
+            bool haveYile = false;
+            for (int i = 0; i < (int)EAysncLoadPriority.Number; i++)
+            {
+                if (m_LoadingAssetArray[(int)EAysncLoadPriority.Hight].Count > 0)
+                {
+                    i = (int)EAysncLoadPriority.Hight;
+                }
+                else if (m_LoadingAssetArray[(int)EAysncLoadPriority.Midddle].Count > 0)
+                {
+                    i = (int)EAysncLoadPriority.Midddle;
+                }
+                if (m_LoadingAssetArray[i].Count <= 0)
+                {
+                    continue;
+                }
+                AsyncLoadAssetParam loadAsset = m_LoadingAssetArray[i][0];
+                if (loadAsset == null)
+                {
+                    Debug.LogError("AsyncLoadAssetParam 未正确加载，请检查");
+                }
+                List<AsyncCallBack> callBacks = loadAsset.CallBackList;
+                ResourceItem item = null;
+                Object obj = null;
+#if UNITY_EDITOR
+                if (m_LoadAssetFormEditor)
+                {
+                    obj = LoadAssetFromEditor<Object>(loadAsset.Path);
+                    //模拟异步
+                    yield return new WaitForSeconds(0.5f);
+                    item = AssetBundleManager.Instance.FindResourceItem(loadAsset.Crc);
+                    if (item == null)
+                    {
+                        //在编辑器状态下，可能没进行打包，不能AssetBundleManager中找到
+                        item = new ResourceItem();
+                        item.Crc = loadAsset.Crc;
+                    }
+                }
+
+#endif
+                if (obj == null)
+                {
+                    //获取带有AB包的ResourceItem
+                    item = AssetBundleManager.Instance.LoadResourceItem(loadAsset.Crc);
+                    if (item != null)
+                    {
+
+                        AssetBundleRequest request = item.AssetBundle.LoadAssetAsync(item.AssetName);
+                        yield return request;
+                        if (request.isDone)
+                        {
+                            obj = request.asset;
+                        }
+                        lastYieldTime = System.DateTime.Now.Ticks;
+                    }
+                }
+
+                CacheResourceItem(loadAsset.Path, ref item, item.Crc, obj, callBacks.Count);
+
+                for (int j = 0; j < callBacks.Count; j++)
+                {
+                    if (callBacks[j] != null && callBacks[j].OnAsyncLoadFinished != null)
+                    {
+                        callBacks[j].OnAsyncLoadFinished(loadAsset.Path, item.AssetObj, callBacks[j].Param1, callBacks[j].Param2, callBacks[j].Param3);
+                    }
+
+                    callBacks[j].Reset();
+                    m_AsyncCallBackPool.Recycle(callBacks[j]);
+                }
+
+                obj = null;
+                callBacks.Clear();
+
+                m_AsyncLoadAssetParamPool.Recycle(loadAsset);
+                m_LoadingAssetDic.Remove(loadAsset.Crc);
+                m_LoadingAssetArray[i].RemoveAt(0);
+                loadAsset.Reset();
+
+                if (System.DateTime.Now.Ticks - lastYieldTime > MAXLOADRESTIME)
+                {
+                    yield return null;
+                    lastYieldTime = System.DateTime.Now.Ticks;
+                    haveYile = true;
+                }
+            }
+
+            if (!haveYile || System.DateTime.Now.Ticks - lastYieldTime > MAXLOADRESTIME)
+            {
+                yield return null;
+                lastYieldTime = System.DateTime.Now.Ticks;
+            }
+        }
     }
 
     /// <summary>
@@ -136,16 +337,25 @@ public class ResourceManager : Singleton<ResourceManager>
         {
             return;
         }
+        if (!destoryObj)
+        {
+            //如果不删除 则加入到RefCount==0的容器中
+            m_NoRefreceAssetMapList.InsertToHead(item);
+            return;
+        }
+
+        /*进入彻底清除ResourceItem的流程*/
+
+        //在AssetDic移除
         if (!AssetDic.Remove(item.Crc))
         {
             return;
         }
+        //在m_NoRefreceAssetMapList移除
+        m_NoRefreceAssetMapList.Remove(item);
 
-        if (!destoryObj)
-        {
-            m_NoRefreceAssetMapList.InsertToHead(item);
-            return;
-        }
+        //释放AssetBundle的引用
+        AssetBundleManager.Instance.ReleseResourceItem(item);
 
         item.AssetObj = null;
 #if UNITY_EDITOR
@@ -162,7 +372,11 @@ public class ResourceManager : Singleton<ResourceManager>
             for (int i = 0; i < MAXCACHECOUNT / 2; i++)
             {
                 ResourceItem item = m_NoRefreceAssetMapList.Back();
-                DestoryResourceItem(item, true);
+                if (item != null)
+                {
+                    DestoryResourceItem(item, true);
+                }
+
             }
 
         }
@@ -235,6 +449,9 @@ public class ResourceManager : Singleton<ResourceManager>
         return t;
     }
 #endif
+
+
+
 }
 /// <summary>
 /// 双向链表节点
