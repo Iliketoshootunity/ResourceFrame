@@ -161,7 +161,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             //引用计数清空，彻底卸载掉这个资源
             if (item.RefCount <= 0 && item.AssetBundle != null)
             {
-                item.AssetBundle.Unload(false);
+                item.AssetBundle.Unload(true);
                 item.Reset();
                 m_AssetBundleItemPool.Recycle(item);
                 m_AssetBundleItemDic.Remove(crc);
