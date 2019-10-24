@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameStart : MonoBehaviour
 {
     public AudioSource AS;
-    public AudioClip AC;
+    protected AudioClip AC;
 
     public GameObject Go;
 
@@ -36,6 +36,7 @@ public class GameStart : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P))
         {
             ResourceManager.Instance.ReleseResourceItem(AC, true);
+            AS.Stop();
             AS.clip = null;
             AC = null;
         }
@@ -45,10 +46,16 @@ public class GameStart : MonoBehaviour
     public void TestCallBack(string path, Object obj, object param1 = null, object param2 = null, object param3 = null)
     {
         AS.clip = (AudioClip)obj;
+        AS.Play();
         AC = AS.clip;
     }
 
-
+    private void OnApplicationQuit()
+    {
+#if UNITY_EDITOR
+        Resources.UnloadUnusedAssets();
+#endif
+    }
 }
 
 public class AA : StateMachineBehaviour

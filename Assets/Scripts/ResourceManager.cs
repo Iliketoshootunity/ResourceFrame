@@ -289,6 +289,7 @@ public class ResourceManager : Singleton<ResourceManager>
                     if (callBacks[j] != null && callBacks[j].OnAsyncLoadFinished != null)
                     {
                         callBacks[j].OnAsyncLoadFinished(loadAsset.Path, item.AssetObj, callBacks[j].Param1, callBacks[j].Param2, callBacks[j].Param3);
+                        callBacks[j].OnAsyncLoadFinished = null;
                     }
 
                     callBacks[j].Reset();
@@ -398,6 +399,8 @@ public class ResourceManager : Singleton<ResourceManager>
 #if UNITY_EDITOR
         Resources.UnloadUnusedAssets();
 #endif
+
+        Resources.UnloadUnusedAssets();
     }
     /// <summary>
     /// 淘汰末尾的，不经常使用的资源
@@ -453,11 +456,15 @@ public class ResourceManager : Singleton<ResourceManager>
             Debug.LogError("ResourceItem is null " + path);
             return;
         }
-        if (item.AssetBundle == null)
+        if (!m_LoadAssetFormEditor)
         {
-            Debug.LogError("ResourceItem AssetBundle is null " + path);
-            return;
+            if (item.AssetBundle == null)
+            {
+                Debug.LogError("ResourceItem AssetBundle is null " + path);
+                return;
+            }
         }
+
         if (obj == null)
         {
             Debug.LogError("ResourceItem AssetObj is null " + path);
