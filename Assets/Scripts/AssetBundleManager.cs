@@ -186,6 +186,9 @@ public class AssetBundleItem
     }
 }
 
+/// <summary>
+/// 从AB包加载的资源的中间类
+/// </summary>
 public class ResourceItem
 {
     //该资源名字

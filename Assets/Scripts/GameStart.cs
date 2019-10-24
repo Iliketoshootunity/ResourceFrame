@@ -9,7 +9,7 @@ public class GameStart : MonoBehaviour
 
     public GameObject Go;
 
-    
+    private float time;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,9 +20,10 @@ public class GameStart : MonoBehaviour
         //AS.clip = AC;
         //AS.Play();
         //StartCoroutine(Test());
-
-        ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
-
+        //time = Time.realtimeSinceStartup;
+        ResourceManager.Instance.PreloadResource(path);
+        //ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
+        //AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
         Vector2 s = new Vector2(67, -90);
         s.Normalize();
         Debug.Log(s);
@@ -39,6 +40,14 @@ public class GameStart : MonoBehaviour
             AS.Stop();
             AS.clip = null;
             AC = null;
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            string path = "Assets/GameData/Sounds/senlin.mp3";
+            time = Time.realtimeSinceStartup;
+            //ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
+            AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
+            Debug.Log(Time.realtimeSinceStartup - time);
         }
     }
 

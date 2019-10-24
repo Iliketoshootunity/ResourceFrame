@@ -18,6 +18,32 @@ public enum EAysncLoadPriority
 }
 
 /// <summary>
+/// 从AB包中实例化的GameObject的中间类
+/// </summary>
+public class ResourceObj
+{
+    //资源路径的crc
+    public uint Crc = 0;
+    //存ResourceItem
+    public ResourceItem AssetObj = null;
+    //实例化的游戏物体
+    public GameObject CloneObj = null;
+    //存GameObject的Instance Id
+    public long GUID = 0;
+    //转场景是否清除
+    public bool Clear = true;
+
+    public void Reset()
+    {
+        Crc = 0;
+        AssetObj = null;
+        CloneObj = null;
+        GUID = 0;
+        Clear = 0;
+    }
+}
+
+/// <summary>
 ///  异步加载加载的参数，在协程种一个个读取信息，进行真正的加载
 /// </summary>
 public class AsyncLoadAssetParam
@@ -68,9 +94,9 @@ public class ResourceManager : Singleton<ResourceManager>
     //正在加载的资源 key是path crc value AsyncLoadAssetParam
     protected Dictionary<uint, AsyncLoadAssetParam> m_LoadingAssetDic = new Dictionary<uint, AsyncLoadAssetParam>();
     //AsyncLoadAssetParam池
-    protected ClassObjectPool<AsyncLoadAssetParam> m_AsyncLoadAssetParamPool = new ClassObjectPool<AsyncLoadAssetParam>(50);
+    protected ClassObjectPool<AsyncLoadAssetParam> m_AsyncLoadAssetParamPool = ObjectManager.Instance.GetOrCreateClassObjectPool<AsyncLoadAssetParam>(50);
     //AsyncCallBack池
-    protected ClassObjectPool<AsyncCallBack> m_AsyncCallBackPool = new ClassObjectPool<AsyncCallBack>(100);
+    protected ClassObjectPool<AsyncCallBack> m_AsyncCallBackPool = ObjectManager.Instance.GetOrCreateClassObjectPool<AsyncCallBack>(500);
 
     protected MonoBehaviour m_StartMono;
 
@@ -116,7 +142,7 @@ public class ResourceManager : Singleton<ResourceManager>
     }
 
     /// <summary>
-    /// 预加载资源,加载的资源在跳转场景时不会清掉
+    /// 预加载无需实例化资源,加载的资源在跳转场景时不会清掉
     /// </summary>
     public void PreloadResource(string path)
     {
@@ -129,6 +155,38 @@ public class ResourceManager : Singleton<ResourceManager>
         }
     }
 
+    public ResourceObj LoadResourceObj(string path, ResourceObj Obj)
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+        uint crc = Crc32.GetCrc32(path);
+        if (Obj.Crc == 0 || Obj.Crc != crc)
+        {
+            Obj.Crc = Crc32.GetCrc32(path);
+            Debug.LogWarning("crc 出项异常");
+        }
+        Object objTemp = LoadResource<Object>(path);
+        if (objTemp)
+        {
+            ResourceItem item = null;
+            if (AssetDic.TryGetValue(Obj.Crc, out item))
+            {
+                item.Clear = Obj.Clear;
+                Obj.AssetObj = item;
+                return Obj;
+            }
+            else
+            {
+                Debug.LogWarning("LoadResourceObj 逻辑错误，请检查");
+                return null;
+            }
+        }
+        else
+        {
+            Debug.LogError("LoadResourceObj 无法正确加载资源");
+            return null;
+        }
+
+    }
 
     /// <summary>
     /// 加载无须实例化的资源，比如说声音片段，图片等等
