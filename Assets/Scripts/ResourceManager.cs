@@ -93,6 +93,42 @@ public class ResourceManager : Singleton<ResourceManager>
         startMono.StartCoroutine(IEAsyncLoadAsset());
     }
 
+    /// <summary>
+    /// 清除缓存
+    /// </summary>
+    public void ClearCache()
+    {
+        List<ResourceItem> tempList = new List<ResourceItem>();
+        foreach (var item in AssetDic)
+        {
+            if (item.Value.Clear)
+            {
+                tempList.Add(item.Value);
+            }
+        }
+
+        for (int i = 0; i < tempList.Count; i++)
+        {
+            DestoryResourceItem(tempList[i], true);
+        }
+
+        tempList.Clear();
+    }
+
+    /// <summary>
+    /// 预加载资源,加载的资源在跳转场景时不会清掉
+    /// </summary>
+    public void PreloadResource(string path)
+    {
+        uint crc = Crc32.GetCrc32(path);
+        LoadResource<Object>(path);
+        ResourceItem item = null;
+        if (AssetDic.TryGetValue(crc, out item))
+        {
+            item.Clear = false;
+        }
+    }
+
 
     /// <summary>
     /// 加载无须实例化的资源，比如说声音片段，图片等等
@@ -112,12 +148,13 @@ public class ResourceManager : Singleton<ResourceManager>
         if (m_LoadAssetFormEditor)
         {
             item = AssetBundleManager.Instance.FindResourceItem(crc);
+            if (item == null)
+            {
+                item = new ResourceItem();
+            }
             if (item.AssetObj == null)
             {
                 item.AssetObj = LoadAssetFromEditor<T>(path);
-            }
-            if (item.AssetObj != null)
-            {
                 obj = item.AssetObj;
             }
         }

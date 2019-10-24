@@ -7,6 +7,9 @@ public class GameStart : MonoBehaviour
     public AudioSource AS;
     public AudioClip AC;
 
+    public GameObject Go;
+
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +22,10 @@ public class GameStart : MonoBehaviour
         //StartCoroutine(Test());
 
         ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
+
+        Vector2 s = new Vector2(67, -90);
+        s.Normalize();
+        Debug.Log(s);
     }
 
 

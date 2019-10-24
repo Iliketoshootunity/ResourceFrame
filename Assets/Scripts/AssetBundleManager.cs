@@ -208,5 +208,7 @@ public class ResourceItem
     public long GUID;
     //最后使用时间
     public float LastUseTime;
+    //是否跳转场景的时候清掉
+    public bool Clear = true;
 }
 
