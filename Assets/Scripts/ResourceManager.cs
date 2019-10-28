@@ -25,22 +25,24 @@ public class ResourceObj
     //资源路径的crc
     public uint Crc = 0;
     //存ResourceItem
-    public ResourceItem AssetObj = null;
+    public ResourceItem ResItem = null;
     //实例化的游戏物体
     public GameObject CloneObj = null;
     //存GameObject的Instance Id
     public long GUID = 0;
     //转场景是否清除
-    public bool Clear = true;
-    public bool Aready;
+    public bool bClear = true;
+    //是否在对象池中
+    public bool bInPool = false;
 
     public void Reset()
     {
         Crc = 0;
-        AssetObj = null;
+        ResItem = null;
         CloneObj = null;
         GUID = 0;
-        Clear = false;
+        bClear = true;
+        bInPool = false;
     }
 }
 
@@ -107,6 +109,76 @@ public class ResourceManager : Singleton<ResourceManager>
     //最大缓存个数
     private const int MAXCACHECOUNT = 500;
 
+    #region 增加/减少ResourceItem的引用计数
+    /// <summary>
+    /// 增加引用计数,根据ResourceObj
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="refCount"></param>
+    public void AddRefCount(ResourceObj obj, int refCount = 1)
+    {
+        if (obj == null)
+        {
+            Debug.LogWarning("ResourceObj 不能为空");
+            return;
+        }
+        AddRefCount(obj.Crc, refCount);
+    }
+    /// <summary>
+    /// 增加引用计数，根据Path
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="refCount"></param>
+    public void AddRefCount(uint pathCrc, int refCount = 1)
+    {
+        ResourceItem item = null;
+        if (AssetDic.TryGetValue(pathCrc, out item) && item != null)
+        {
+            item.RefCount += refCount;
+            return;
+        }
+        Debug.LogWarning("找不到匹配的ResourceItem");
+    }
+    /// <summary>
+    /// 减少引用计数，根据ResourceObj
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="refCount"></param>
+    public void ReducefCont(ResourceObj obj, int refCount = 1)
+    {
+        if (obj == null)
+        {
+            Debug.LogWarning("ResourceObj 不能为空");
+            return;
+        }
+        ReducefCont(obj.Crc, refCount);
+    }
+    /// <summary>
+    /// 减少引用计数，根据Path
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="refCount"></param>
+    public void ReducefCont(uint pathCrc, int refCount = 1)
+    {
+        ResourceItem item = null;
+        if (AssetDic.TryGetValue(pathCrc, out item) && item != null)
+        {
+            item.RefCount -= refCount;
+            if (item.RefCount < 0)
+            {
+                item.RefCount = 0;
+            }
+            return;
+        }
+        Debug.LogWarning("找不到匹配的ResourceItem");
+    }
+    #endregion
+
+    #region 初始化
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    /// <param name="startMono"></param>
     public void Init(MonoBehaviour startMono)
     {
         m_StartMono = startMono;
@@ -119,7 +191,25 @@ public class ResourceManager : Singleton<ResourceManager>
 
         startMono.StartCoroutine(IEAsyncLoadAsset());
     }
+    #endregion
 
+    #region 预加载
+    /// <summary>
+    /// 预加载无需实例化资源,加载的资源在跳转场景时不会清掉
+    /// </summary>
+    public void PreloadResource(string path)
+    {
+        uint crc = Crc32.GetCrc32(path);
+        LoadResource<Object>(path);
+        ResourceItem item = null;
+        if (AssetDic.TryGetValue(crc, out item))
+        {
+            item.Clear = false;
+        }
+    }
+    #endregion
+
+    #region 清除缓存
     /// <summary>
     /// 清除缓存
     /// </summary>
@@ -141,21 +231,9 @@ public class ResourceManager : Singleton<ResourceManager>
 
         tempList.Clear();
     }
+    #endregion
 
-    /// <summary>
-    /// 预加载无需实例化资源,加载的资源在跳转场景时不会清掉
-    /// </summary>
-    public void PreloadResource(string path)
-    {
-        uint crc = Crc32.GetCrc32(path);
-        LoadResource<Object>(path);
-        ResourceItem item = null;
-        if (AssetDic.TryGetValue(crc, out item))
-        {
-            item.Clear = false;
-        }
-    }
-
+    #region 加载
     public ResourceObj LoadResourceObj(string path, ResourceObj Obj)
     {
         if (string.IsNullOrEmpty(path)) return null;
@@ -163,7 +241,6 @@ public class ResourceManager : Singleton<ResourceManager>
         if (Obj.Crc == 0 || Obj.Crc != crc)
         {
             Obj.Crc = Crc32.GetCrc32(path);
-            Debug.LogWarning("crc 出项异常");
         }
         Object objTemp = LoadResource<Object>(path);
         if (objTemp)
@@ -171,8 +248,8 @@ public class ResourceManager : Singleton<ResourceManager>
             ResourceItem item = null;
             if (AssetDic.TryGetValue(Obj.Crc, out item))
             {
-                item.Clear = Obj.Clear;
-                Obj.AssetObj = item;
+                item.Clear = Obj.bClear;
+                Obj.ResItem = item;
                 return Obj;
             }
             else
@@ -379,6 +456,46 @@ public class ResourceManager : Singleton<ResourceManager>
         }
     }
 
+#if UNITY_EDITOR
+    protected T LoadAssetFromEditor<T>(string path) where T : UnityEngine.Object
+    {
+        T t = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
+        return t;
+    }
+#endif
+    #endregion
+    #region 释放
+
+    /// <summary>
+    /// 释放ResourceObj
+    /// </summary>
+    public void ReleseResourceObj(ResourceObj Obj, bool destoryObj)
+    {
+        if (Obj == null)
+        {
+            Debug.LogWarning("ResourceObj 逻辑上不可能为空，请检查");
+            return;
+        }
+        if (Obj.Crc == 0 || Obj.CloneObj == null)
+        {
+            Debug.LogWarning("ResourceObj的数据 逻辑上不可能为空，请检查");
+            return;
+        }
+        ResourceItem item = null;
+        if (!AssetDic.TryGetValue(Obj.Crc, out item))
+        {
+            Debug.LogError("ResourceObj的路径Crc和ResourceItem表AssetDic不匹配，请检查");
+            return;
+        }
+        if (item == null)
+        {
+            Debug.LogError("ResourceItem 不能为空，请检查");
+            return;
+        }
+        GameObject.Destroy(Obj.CloneObj);
+        item.RefCount--;
+        DestoryResourceItem(item, destoryObj);
+    }
     /// <summary>
     /// 释放不需要实例化的资源 ,根据路径
     /// </summary>
@@ -400,7 +517,7 @@ public class ResourceManager : Singleton<ResourceManager>
     }
 
     /// <summary>
-    /// 释放不需要实例化的资源 ,
+    /// 释放不需要实例化的资源 ,,根据对象
     /// </summary>
     public void ReleseResourceItem(UnityEngine.Object obj, bool destoryObj = false)
     {
@@ -478,7 +595,8 @@ public class ResourceManager : Singleton<ResourceManager>
 
         }
     }
-
+    #endregion
+    #region 获取
     /// <summary>
     /// 获取缓存资源
     /// </summary>
@@ -542,14 +660,9 @@ public class ResourceManager : Singleton<ResourceManager>
         }
 
     }
+    #endregion
 
-#if UNITY_EDITOR
-    protected T LoadAssetFromEditor<T>(string path) where T : UnityEngine.Object
-    {
-        T t = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
-        return t;
-    }
-#endif
+
 
 
 

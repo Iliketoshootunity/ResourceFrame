@@ -13,11 +13,11 @@ public class GameStart : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
-
-
-        //AssetBundleManager.Instance.LoadAssetBundleConfig();
-        //ResourceManager.Instance.Init(this);
+        Transform spawnTrs = transform.Find("SpawnTrs");
+        Transform recycleTrs = transform.Find("RecycleTrs");
+        AssetBundleManager.Instance.LoadAssetBundleConfig();
+        ResourceManager.Instance.Init(this);
+        ObjectManager.Instance.Init(spawnTrs, recycleTrs);
         //string path = "Assets/GameData/Sounds/senlin.mp3";
         ////AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
         ////AS.clip = AC;
@@ -39,6 +39,19 @@ public class GameStart : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            string path = "Assets/GameData/Prefab/Attack.prefab";
+            Go = ObjectManager.Instance.Instantiate(path, true);
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            ObjectManager.Instance.ReleseGameObject(Go);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            ObjectManager.Instance.ReleseGameObject(Go, 0, true);
+        }
         if (Input.touches.Length > 0)
         {
             Touch temp = Input.GetTouch(0);
