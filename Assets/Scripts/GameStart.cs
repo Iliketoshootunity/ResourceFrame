@@ -13,20 +13,25 @@ public class GameStart : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        AssetBundleManager.Instance.LoadAssetBundleConfig();
-        ResourceManager.Instance.Init(this);
-        string path = "Assets/GameData/Sounds/senlin.mp3";
-        //AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
-        //AS.clip = AC;
-        //AS.Play();
-        //StartCoroutine(Test());
-        //time = Time.realtimeSinceStartup;
-        ResourceManager.Instance.PreloadResource(path);
-        //ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
-        //AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
-        Vector2 s = new Vector2(67, -90);
-        s.Normalize();
-        Debug.Log(s);
+
+
+
+        //AssetBundleManager.Instance.LoadAssetBundleConfig();
+        //ResourceManager.Instance.Init(this);
+        //string path = "Assets/GameData/Sounds/senlin.mp3";
+        ////AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
+        ////AS.clip = AC;
+        ////AS.Play();
+        ////StartCoroutine(Test());
+        ////time = Time.realtimeSinceStartup;
+        //ResourceManager.Instance.PreloadResource(path);
+        ////ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Hight, TestCallBack);
+        ////AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
+        //Vector2 s = new Vector2(67, -90);
+        //s.Normalize();
+        //Debug.Log(s);
+
+
     }
 
 
@@ -34,6 +39,12 @@ public class GameStart : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.touches.Length > 0)
+        {
+            Touch temp = Input.GetTouch(0);
+            Debug.Log(temp.fingerId);
+        }
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             ResourceManager.Instance.ReleseResourceItem(AC, true);

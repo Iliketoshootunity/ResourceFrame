@@ -32,6 +32,7 @@ public class ResourceObj
     public long GUID = 0;
     //转场景是否清除
     public bool Clear = true;
+    public bool Aready;
 
     public void Reset()
     {
@@ -39,7 +40,7 @@ public class ResourceObj
         AssetObj = null;
         CloneObj = null;
         GUID = 0;
-        Clear = 0;
+        Clear = false;
     }
 }
 
@@ -457,8 +458,6 @@ public class ResourceManager : Singleton<ResourceManager>
 #if UNITY_EDITOR
         Resources.UnloadUnusedAssets();
 #endif
-
-        Resources.UnloadUnusedAssets();
     }
     /// <summary>
     /// 淘汰末尾的，不经常使用的资源
