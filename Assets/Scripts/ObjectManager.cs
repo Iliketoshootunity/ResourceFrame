@@ -5,10 +5,12 @@ using UnityEngine;
 
 public class ObjectManager : Singleton<ObjectManager>
 {
+    //由ObjectManager实例化的所有对象，ResourceObj包含已经实例化的GameObject,key是GameObject的InstanceId。
+    //m_ResourceObjDic包含Active的，和在m_ResourceObjPool里的
+    private Dictionary<int, ResourceObj> m_ResourceObjDic = new Dictionary<int, ResourceObj>();
     //GameObject对象池,key是Path的crc
     private Dictionary<uint, List<ResourceObj>> m_ResourceObjPool = new Dictionary<uint, List<ResourceObj>>();
-    //由ObjectManager实例化的所有对象，key是InstanceId
-    private Dictionary<int, ResourceObj> m_ResourceObjDic = new Dictionary<int, ResourceObj>();
+
     //ResourceObj类对象池
     private ClassObjectPool<ResourceObj> m_ResourceObjClassPool;
 
@@ -66,7 +68,7 @@ public class ObjectManager : Singleton<ObjectManager>
     /// <param name="isSpawnTrsChild"></param>
     /// <param name="clear"></param>
     /// <returns></returns>
-    public GameObject Instantiate(string path, bool isSpawnTrsChild = true, bool clear = true)
+    public GameObject InstantiateGameObject(string path, bool isSpawnTrsChild = false, bool clear = true)
     {
         if (string.IsNullOrEmpty(path)) return null;
         uint crc = Crc32.GetCrc32(path);
@@ -103,6 +105,42 @@ public class ObjectManager : Singleton<ObjectManager>
 
         return resourceObj.CloneObj;
 
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="loadPriority"></param>
+    /// <param name="finishCallBack"></param>
+    /// <param name="parem1"></param>
+    /// <param name="parem2"></param>
+    /// <param name="parem3"></param>
+    /// <returns></returns>
+    public long AsyncInstantiateGameObject(string path, EAysncLoadPriority loadPriority, OnAsyncObjFinsih finishCallBack, bool isSpawnTrsChild = true, bool clear = true, object parem1 = null, object parem2 = null, object parem3 = null)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return 0;
+        }
+        uint crc = Crc32.GetCrc32(path);
+        //先从对象池中获取
+        ResourceObj resourceObj = GetResourceObjFromPool(crc);
+        if (resourceObj != null)
+        {
+            if (isSpawnTrsChild)
+            {
+                resourceObj.CloneObj.transform.SetParent(m_SpawnTrs);
+            }
+        }
+        resourceObj = m_ResourceObjClassPool.Spawn(true);
+        resourceObj.Crc = crc;
+        resourceObj.bIsSpawnTrsChild = isSpawnTrsChild;
+        resourceObj.bClear = clear;
+        resourceObj.Param1 = parem1;
+        resourceObj.Param2 = parem2;
+        resourceObj.Param3 = parem3;
+        resourceObj.FinishCallBack = finishCallBack;
+        return 0;
     }
 
     /// <summary>

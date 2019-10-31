@@ -4,7 +4,8 @@ using UnityEngine;
 
 //异步加载不需要实例化的资源的回调
 public delegate void OnAsyncObjFinsih(string path, Object obj, object param1 = null, object param2 = null, object param3 = null);
-
+//实例化资源加载完成回调
+public delegate void OnAsyncResObjFinsih(string path, ResourceObj obj, object param1 = null, object param2 = null, object param3 = null);
 
 /// <summary>
 /// 异步加载优先级的枚举
@@ -34,6 +35,13 @@ public class ResourceObj
     public bool bClear = true;
     //是否在对象池中
     public bool bInPool = false;
+    //-----------------------异步的参数
+    //保存是否是Spawn Transform的子物体
+    public bool bIsSpawnTrsChild;
+    //加载完成的回调
+    public OnAsyncObjFinsih FinishCallBack;
+    //回调参数
+    public object Param1, Param2, Param3;
 
     public void Reset()
     {
@@ -43,6 +51,12 @@ public class ResourceObj
         GUID = 0;
         bClear = true;
         bInPool = false;
+        bIsSpawnTrsChild = true;
+        FinishCallBack = null;
+        Param1 = null;
+        Param2 = null;
+        Param3 = null;
+
     }
 }
 
@@ -70,12 +84,17 @@ public class AsyncLoadAssetParam
 /// </summary>
 public class AsyncCallBack
 {
-    public OnAsyncObjFinsih OnAsyncLoadFinished;
-    public UnityEngine.Object Param1, Param2, Param3;
+
+    public OnAsyncResObjFinsih OnAsyncResObjLoadFinished;
+
+    public OnAsyncObjFinsih OnAsyncObjLoadFinished;
+    public object Param1, Param2, Param3;
 
     public void Reset()
     {
-        OnAsyncLoadFinished = null;
+        OnAsyncObjLoadFinished = null;
+        OnAsyncResObjLoadFinished = null;
+
         Param1 = null;
         Param2 = null;
         Param3 = null;
@@ -94,7 +113,7 @@ public class ResourceManager : Singleton<ResourceManager>
 
     //正在加载的资源(根据优先级)
     protected List<AsyncLoadAssetParam>[] m_LoadingAssetArray;
-    //正在加载的资源 key是path crc value AsyncLoadAssetParam
+    //正在加载的资源 key是path crc value是 AsyncLoadAssetParam
     protected Dictionary<uint, AsyncLoadAssetParam> m_LoadingAssetDic = new Dictionary<uint, AsyncLoadAssetParam>();
     //AsyncLoadAssetParam池
     protected ClassObjectPool<AsyncLoadAssetParam> m_AsyncLoadAssetParamPool = ObjectManager.Instance.GetOrCreateClassObjectPool<AsyncLoadAssetParam>(50);
@@ -314,6 +333,29 @@ public class ResourceManager : Singleton<ResourceManager>
         return obj as T;
     }
     /// <summary>
+    /// 异步加载预制体
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="loadPriority"></param>
+    /// <param name="obj"></param>
+    public void AsyncLoadPrefab(string path, EAysncLoadPriority loadPriority, ResourceObj obj)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        uint crc = Crc32.GetCrc32(path);
+        //已经在缓存内
+        ResourceItem item = GetCacheResourceItem(crc);
+        if (item != null)
+        {
+            obj.CloneObj = GameObject.Instantiate((GameObject)item.AssetObj);
+            if (obj.FinishCallBack != null)
+            {
+                obj.FinishCallBack(path, obj.CloneObj, obj.Param1, obj.Param2, obj.Param2);
+            }
+            return;
+        }
+    }
+
+    /// <summary>
     /// 异步加载不需要实例化的资源
     /// </summary>
     /// <param name="path"></param>
@@ -344,12 +386,14 @@ public class ResourceManager : Singleton<ResourceManager>
         }
         //添加回调
         AsyncCallBack callBack = m_AsyncCallBackPool.Spawn(true);
-        callBack.OnAsyncLoadFinished = finishCallBack;
+        callBack.OnAsyncObjLoadFinished = finishCallBack;
         callBack.Param1 = parem1;
         callBack.Param2 = parem2;
         callBack.Param3 = parem3;
         loadingAsset.CallBackList.Add(callBack);
+        //添加在根据优先级分类的容器
         m_LoadingAssetArray[(int)loadPriority].Add(loadingAsset);
+        //添加在key是crc的字典
         m_LoadingAssetDic.Add(crc, loadingAsset);
     }
 
@@ -422,10 +466,11 @@ public class ResourceManager : Singleton<ResourceManager>
 
                 for (int j = 0; j < callBacks.Count; j++)
                 {
-                    if (callBacks[j] != null && callBacks[j].OnAsyncLoadFinished != null)
+                    //触发加载完成回调
+                    if (callBacks[j] != null && callBacks[j].OnAsyncObjLoadFinished != null)
                     {
-                        callBacks[j].OnAsyncLoadFinished(loadAsset.Path, item.AssetObj, callBacks[j].Param1, callBacks[j].Param2, callBacks[j].Param3);
-                        callBacks[j].OnAsyncLoadFinished = null;
+                        callBacks[j].OnAsyncObjLoadFinished(loadAsset.Path, item.AssetObj, callBacks[j].Param1, callBacks[j].Param2, callBacks[j].Param3);
+                        callBacks[j].OnAsyncObjLoadFinished = null;
                     }
 
                     callBacks[j].Reset();

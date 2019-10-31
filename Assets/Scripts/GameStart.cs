@@ -42,7 +42,7 @@ public class GameStart : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             string path = "Assets/GameData/Prefab/Attack.prefab";
-            Go = ObjectManager.Instance.Instantiate(path, true);
+            Go = ObjectManager.Instance.InstantiateGameObject(path, true);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
