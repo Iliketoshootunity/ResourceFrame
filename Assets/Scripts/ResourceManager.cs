@@ -36,6 +36,7 @@ public class ResourceObj
     //是否在对象池中
     public bool bInPool = false;
     //-----------------------异步的参数
+
     //保存是否是Spawn Transform的子物体
     public bool bIsSpawnTrsChild;
     //加载完成的回调
@@ -84,8 +85,12 @@ public class AsyncLoadAssetParam
 /// </summary>
 public class AsyncCallBack
 {
-
+    //加载GameObject完成回调
     public OnAsyncResObjFinsih OnAsyncResObjLoadFinished;
+    //GameObject 中间类
+    public ResourceObj ResObj;
+
+    //--------------上下两个回调看情况使用其中一个------------------------
 
     public OnAsyncObjFinsih OnAsyncObjLoadFinished;
     public object Param1, Param2, Param3;
@@ -104,6 +109,20 @@ public class AsyncCallBack
 
 public class ResourceManager : Singleton<ResourceManager>
 {
+
+    private long guidIndex;
+
+    /// <summary>
+    /// 创建GUID
+    /// </summary>
+    /// <returns></returns>
+    public long CreateGuid()
+    {
+        return guidIndex++;
+    }
+
+
+
     protected bool m_LoadAssetFormEditor = false;
 
     //缓存的资源 key是path crc value 是ResourceItem
@@ -333,12 +352,12 @@ public class ResourceManager : Singleton<ResourceManager>
         return obj as T;
     }
     /// <summary>
-    /// 异步加载预制体
+    /// 异步加载ResourceObj
     /// </summary>
     /// <param name="path"></param>
     /// <param name="loadPriority"></param>
     /// <param name="obj"></param>
-    public void AsyncLoadPrefab(string path, EAysncLoadPriority loadPriority, ResourceObj obj)
+    public void AsyncLoadResourceObj(string path, EAysncLoadPriority loadPriority, ResourceObj obj, OnAsyncResObjFinsih finishCallBack)
     {
         if (string.IsNullOrEmpty(path)) return;
         uint crc = Crc32.GetCrc32(path);
@@ -347,12 +366,33 @@ public class ResourceManager : Singleton<ResourceManager>
         if (item != null)
         {
             obj.CloneObj = GameObject.Instantiate((GameObject)item.AssetObj);
-            if (obj.FinishCallBack != null)
+            if (finishCallBack != null)
             {
-                obj.FinishCallBack(path, obj.CloneObj, obj.Param1, obj.Param2, obj.Param2);
+                finishCallBack(path, obj, obj.Param1, obj.Param2, obj.Param2);
             }
             return;
         }
+        //查找是否在异步加载列表中
+        AsyncLoadAssetParam asyncParam = null;
+        if (!m_LoadingAssetDic.TryGetValue(crc, out asyncParam) || asyncParam == null)
+        {
+            //修改里面的参数
+            asyncParam = m_AsyncLoadAssetParamPool.Spawn(true);
+            asyncParam.Crc = crc;
+            asyncParam.Path = path;
+            m_LoadingAssetDic.Add(crc, asyncParam);
+            m_LoadingAssetArray[(int)loadPriority].Add(asyncParam);
+        }
+
+        //修改参数
+        asyncParam.Priority = loadPriority;
+        AsyncCallBack callBack = m_AsyncCallBackPool.Spawn(true);
+        callBack.ResObj = obj;
+        callBack.OnAsyncResObjLoadFinished = finishCallBack;
+        //callBack.Param1 = obj.Param1;
+        //callBack.Param2 = obj.Param2;
+        //callBack.Param3 = obj.Param3;
+        asyncParam.CallBackList.Add(callBack);
     }
 
     /// <summary>

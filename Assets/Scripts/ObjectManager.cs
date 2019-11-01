@@ -131,18 +131,55 @@ public class ObjectManager : Singleton<ObjectManager>
             {
                 resourceObj.CloneObj.transform.SetParent(m_SpawnTrs);
             }
+            return resourceObj.GUID;
         }
+
+        long guid = ResourceManager.Instance.CreateGuid();
         resourceObj = m_ResourceObjClassPool.Spawn(true);
         resourceObj.Crc = crc;
+        resourceObj.GUID = guid;
         resourceObj.bIsSpawnTrsChild = isSpawnTrsChild;
+        resourceObj.FinishCallBack = finishCallBack;
         resourceObj.bClear = clear;
         resourceObj.Param1 = parem1;
         resourceObj.Param2 = parem2;
         resourceObj.Param3 = parem3;
-        resourceObj.FinishCallBack = finishCallBack;
-        return 0;
+        //异步加载GameObject
+        ResourceManager.Instance.AsyncLoadResourceObj(path, loadPriority, resourceObj, OnLoadFinishedGameObject);
+        return guid;
     }
-
+    /// <summary>
+    /// 加载GameObject完成
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="obj"></param>
+    /// <param name="param1"></param>
+    /// <param name="param2"></param>
+    /// <param name="param3"></param>
+    public void OnLoadFinishedGameObject(string path, ResourceObj obj, object param1 = null, object param2 = null, object param3 = null)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            Debug.LogError("异步加载GameObject的对象为空");
+            return;
+        }
+        if (obj == null)
+        {
+            Debug.LogError("异步加载的GameObject的中间类ResourceObj为空");
+            return;
+        }
+        if (obj.ResItem == null)
+        {
+            Debug.LogError("异步加载的资源的中间类ResourceItem为空");
+            return;
+        }
+        obj.CloneObj = GameObject.Instantiate((GameObject)obj.ResItem.AssetObj);
+        
+        //if (obj.FinishCallBack != null)
+        //{
+        //    obj.FinishCallBack(path, obj.CloneObj obj.Param1, obj.Param2, obj.Param3);
+        //}
+    }
     /// <summary>
     /// 回收GameObject
     /// </summary>
