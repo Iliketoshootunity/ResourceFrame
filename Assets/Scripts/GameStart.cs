@@ -18,6 +18,7 @@ public class GameStart : MonoBehaviour
         AssetBundleManager.Instance.LoadAssetBundleConfig();
         ResourceManager.Instance.Init(this);
         ObjectManager.Instance.Init(spawnTrs, recycleTrs);
+
         //string path = "Assets/GameData/Sounds/senlin.mp3";
         ////AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
         ////AS.clip = AC;
@@ -31,6 +32,14 @@ public class GameStart : MonoBehaviour
         //s.Normalize();
         //Debug.Log(s);
 
+        float Dot = Vector2.Dot((new Vector2(1, 1)).normalized, new Vector2(0, 1));
+        Debug.Log("SSS" + Dot);
+        Debug.Log("SSS" + Mathf.Sqrt(2) * Mathf.Cos(45));
+        Vector3 p1 = new Vector3(0, 150, 0);
+        Vector3 p2 = new Vector3(0, -210, 0);
+        Quaternion q1 = Quaternion.Euler(p1);
+        Quaternion q2 = Quaternion.Euler(p1);
+
 
     }
 
@@ -42,7 +51,8 @@ public class GameStart : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             string path = "Assets/GameData/Prefab/Attack.prefab";
-            Go = ObjectManager.Instance.InstantiateGameObject(path, true);
+            //Go = ObjectManager.Instance.InstantiateGameObject(path, true);
+            ObjectManager.Instance.AsyncInstantiateGameObject(path, EAysncLoadPriority.Hight, GameObjectCallBack);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
@@ -73,6 +83,11 @@ public class GameStart : MonoBehaviour
             AC = ResourceManager.Instance.LoadResource<AudioClip>(path);
             Debug.Log(Time.realtimeSinceStartup - time);
         }
+    }
+
+    public void GameObjectCallBack(string path, Object obj, object param1 = null, object param2 = null, object param3 = null)
+    {
+        Go = (GameObject)obj;
     }
 
 

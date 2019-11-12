@@ -10,7 +10,8 @@ public class ObjectManager : Singleton<ObjectManager>
     private Dictionary<int, ResourceObj> m_ResourceObjDic = new Dictionary<int, ResourceObj>();
     //GameObject对象池,key是Path的crc
     private Dictionary<uint, List<ResourceObj>> m_ResourceObjPool = new Dictionary<uint, List<ResourceObj>>();
-
+    //正在异步加载的ResourceObj，Key 是GUID
+    private Dictionary<long, ResourceObj> m_AsyncResObjs = new Dictionary<long, ResourceObj>();
     //ResourceObj类对象池
     private ClassObjectPool<ResourceObj> m_ResourceObjClassPool;
 
@@ -29,6 +30,71 @@ public class ObjectManager : Singleton<ObjectManager>
         m_RecycleTrs = recycleTrs;
         m_RecycleTrs.gameObject.SetActive(false);
     }
+    /// <summary>
+    /// 清空对象池
+    /// </summary>
+    public void ClearPool()
+    {
+        List<uint> tempList = new List<uint>();
+        foreach (var item in m_ResourceObjPool)
+        {
+            tempList.Add(item.Key);
+        }
+        for (int i = 0; i < tempList.Count; i++)
+        {
+            ClearPoolObject(tempList[i]);
+        }
+        tempList.Clear();
+    }
+
+    /// <summary>
+    /// 清除某个资源的对象池
+    /// </summary>
+    /// <param name="crc"></param>
+    public void ClearPoolObject(uint crc)
+    {
+        List<ResourceObj> objs = null;
+        if (m_ResourceObjPool.TryGetValue(crc, out objs))
+        {
+            for (int i = objs.Count - 1; i >= 0; i--)
+            {
+                ResourceObj obj = objs[i];
+                if (obj.bClear)
+                {
+                    int tempGUID = obj.CloneObj.GetInstanceID();
+                    obj.Reset();
+                    GameObject.Destroy(obj.CloneObj);
+                    m_ResourceObjClassPool.Recycle(obj);
+                    m_ResourceObjDic.Remove(tempGUID);
+                    objs.Remove(obj);
+                }
+
+            }
+        }
+        if (objs != null && objs.Count < 0)
+        {
+            m_ResourceObjPool.Remove(crc);
+        }
+    }
+
+    /// <summary>
+    /// 预加载
+    /// </summary>
+    public void PreLoadGameObject(string path, int count = 1, bool clear = false)
+    {
+        List<GameObject> tempGameObject = new List<GameObject>();
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = InstantiateGameObject(path, false, clear);
+            tempGameObject.Add(go);
+        }
+        for (int i = 0; i < tempGameObject.Count; i++)
+        {
+            ReleseGameObject(tempGameObject[i]);
+        }
+        tempGameObject.Clear();
+    }
+
     /// <summary>
     /// 从对象池中得到ResourceObj
     /// </summary>
@@ -61,6 +127,18 @@ public class ObjectManager : Singleton<ObjectManager>
             return null;
         }
     }
+    /// <summary>
+    /// 取消加载
+    /// </summary>
+    public void CancleLoad(long guid)
+    {
+        ResourceObj obj = null;
+        if (m_AsyncResObjs.TryGetValue(guid, out obj) && obj != null)
+        {
+
+        }
+    }
+
     /// <summary>
     /// 同步实例化对象
     /// </summary>
@@ -107,7 +185,7 @@ public class ObjectManager : Singleton<ObjectManager>
 
     }
     /// <summary>
-    /// 
+    /// 异步实例化GameObject
     /// </summary>
     /// <param name="path"></param>
     /// <param name="loadPriority"></param>
@@ -131,10 +209,16 @@ public class ObjectManager : Singleton<ObjectManager>
             {
                 resourceObj.CloneObj.transform.SetParent(m_SpawnTrs);
             }
+            if (finishCallBack != null)
+            {
+                finishCallBack(path, resourceObj.CloneObj, parem1, parem2, parem3);
+            }
             return resourceObj.GUID;
         }
-
+        //添加到正在异步加载的字典中
         long guid = ResourceManager.Instance.CreateGuid();
+        m_AsyncResObjs.Add(guid, resourceObj);
+        //给ResourceObj 赋值
         resourceObj = m_ResourceObjClassPool.Spawn(true);
         resourceObj.Crc = crc;
         resourceObj.GUID = guid;
@@ -156,16 +240,16 @@ public class ObjectManager : Singleton<ObjectManager>
     /// <param name="param1"></param>
     /// <param name="param2"></param>
     /// <param name="param3"></param>
-    public void OnLoadFinishedGameObject(string path, ResourceObj obj, object param1 = null, object param2 = null, object param3 = null)
+    public void OnLoadFinishedGameObject(string path, ResourceObj obj)
     {
-        if (string.IsNullOrEmpty(path))
-        {
-            Debug.LogError("异步加载GameObject的对象为空");
-            return;
-        }
         if (obj == null)
         {
             Debug.LogError("异步加载的GameObject的中间类ResourceObj为空");
+            return;
+        }
+        if (string.IsNullOrEmpty(path))
+        {
+            Debug.LogError("异步加载GameObject的对象为空");
             return;
         }
         if (obj.ResItem == null)
@@ -173,15 +257,35 @@ public class ObjectManager : Singleton<ObjectManager>
             Debug.LogError("异步加载的资源的中间类ResourceItem为空");
             return;
         }
+        //加载完成，从正在加载的异步字典中移除
+        if (m_AsyncResObjs.ContainsKey(obj.GUID))
+        {
+            m_AsyncResObjs.Remove(obj.GUID);
+        }
+
         obj.CloneObj = GameObject.Instantiate((GameObject)obj.ResItem.AssetObj);
-        
-        //if (obj.FinishCallBack != null)
-        //{
-        //    obj.FinishCallBack(path, obj.CloneObj obj.Param1, obj.Param2, obj.Param3);
-        //}
+        if (obj.CloneObj != null)
+        {
+            //添加到已经实例化完成的GameObject字典中
+            int guid = obj.CloneObj.GetInstanceID();
+            if (!m_ResourceObjDic.ContainsKey(guid))
+            {
+                m_ResourceObjDic.Add(guid, obj);
+            }
+            if (obj.bIsSpawnTrsChild)
+            {
+                obj.CloneObj.transform.SetParent(m_SpawnTrs);
+            }
+        }
+        if (obj.FinishCallBack != null)
+        {
+            obj.FinishCallBack(path, obj.CloneObj, obj.Param1, obj.Param2, obj.Param3);
+        }
+
     }
     /// <summary>
     /// 回收GameObject
+    /// maxCacheCount <0 标志无限缓存
     /// </summary>
     public bool ReleseGameObject(GameObject obj, int maxCacheCount = -1, bool destoryObj = false, bool isRecycleTrsChild = true)
     {

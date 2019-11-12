@@ -5,7 +5,7 @@ using UnityEngine;
 //异步加载不需要实例化的资源的回调
 public delegate void OnAsyncObjFinsih(string path, Object obj, object param1 = null, object param2 = null, object param3 = null);
 //实例化资源加载完成回调
-public delegate void OnAsyncResObjFinsih(string path, ResourceObj obj, object param1 = null, object param2 = null, object param3 = null);
+public delegate void OnAsyncResObjFinsih(string path, ResourceObj obj);
 
 /// <summary>
 /// 异步加载优先级的枚举
@@ -368,7 +368,7 @@ public class ResourceManager : Singleton<ResourceManager>
             obj.CloneObj = GameObject.Instantiate((GameObject)item.AssetObj);
             if (finishCallBack != null)
             {
-                finishCallBack(path, obj, obj.Param1, obj.Param2, obj.Param2);
+                finishCallBack(path, obj);
             }
             return;
         }
@@ -506,6 +506,17 @@ public class ResourceManager : Singleton<ResourceManager>
 
                 for (int j = 0; j < callBacks.Count; j++)
                 {
+                    //触发加载ResourceObj回调完成
+                    if (callBacks[j] != null && callBacks[j].OnAsyncResObjLoadFinished != null)
+                    {
+                        ResourceObj resObj = callBacks[j].ResObj;
+                        resObj.ResItem = item;
+                        if (resObj != null)
+                        {
+                            callBacks[j].OnAsyncResObjLoadFinished(loadAsset.Path, callBacks[j].ResObj);
+                        }
+                    }
+
                     //触发加载完成回调
                     if (callBacks[j] != null && callBacks[j].OnAsyncObjLoadFinished != null)
                     {
@@ -549,6 +560,7 @@ public class ResourceManager : Singleton<ResourceManager>
     }
 #endif
     #endregion
+
     #region 释放
 
     /// <summary>
@@ -645,9 +657,13 @@ public class ResourceManager : Singleton<ResourceManager>
 
         /*进入彻底清除ResourceItem的流程*/
 
+        //如果是GameObject ，删除池所有的缓存
+        ObjectManager.Instance.ClearPoolObject(item.Crc);
+
         //在AssetDic移除
         if (!AssetDic.Remove(item.Crc))
         {
+            Debug.LogError(item.Crc + "不在AssetDic 中");
             return;
         }
         //在m_NoRefreceAssetMapList移除
@@ -681,6 +697,7 @@ public class ResourceManager : Singleton<ResourceManager>
         }
     }
     #endregion
+
     #region 获取
     /// <summary>
     /// 获取缓存资源
