@@ -30,6 +30,22 @@ public class ObjectManager : Singleton<ObjectManager>
         m_RecycleTrs = recycleTrs;
         m_RecycleTrs.gameObject.SetActive(false);
     }
+
+    /// <summary>
+    /// 这个角色是否由ObjectManager创建
+    /// </summary>
+    /// <param name="gameObject"></param>
+    /// <returns></returns>
+    public bool IsCreateByObjectManager(GameObject gameObject)
+    {
+        if (gameObject == null) return false;
+        int instanceId = gameObject.GetInstanceID();
+        if (m_ResourceObjDic.ContainsKey(instanceId))
+        {
+            return true;
+        }
+        return false;
+    }
     /// <summary>
     /// 清空对象池
     /// </summary>
@@ -135,6 +151,12 @@ public class ObjectManager : Singleton<ObjectManager>
         ResourceObj obj = null;
         if (m_AsyncResObjs.TryGetValue(guid, out obj) && obj != null)
         {
+            if (ResourceManager.Instance.CancleLoad(obj))
+            {
+                m_AsyncResObjs.Remove(guid);
+                obj.Reset();
+                m_ResourceObjClassPool.Recycle(obj);
+            }
 
         }
     }

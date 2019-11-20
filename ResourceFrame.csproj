@@ -257,6 +257,9 @@
     <Compile Include="Assets\Scripts\CRC32.cs" />
     <Compile Include="Assets\Scripts\GameStart.cs" />
     <Compile Include="Assets\Scripts\ObjectManager.cs" />
+    <Compile Include="Assets\Scripts\OfflineData\EffectOfflineData.cs" />
+    <Compile Include="Assets\Scripts\OfflineData\OfflineData.cs" />
+    <Compile Include="Assets\Scripts\OfflineData\UIOfflineData.cs" />
     <Compile Include="Assets\Scripts\ResourceManager.cs" />
     <Compile Include="Assets\Scripts\SerilizeDemo\TestSerilize.cs" />
     <Compile Include="Assets\Scripts\SerilizeDemo\XMLMono.cs" />

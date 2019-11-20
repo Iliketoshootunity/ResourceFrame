@@ -271,6 +271,41 @@ public class ResourceManager : Singleton<ResourceManager>
     }
     #endregion
 
+    #region 取消加载
+    public bool CancleLoad(ResourceObj obj)
+    {
+        AsyncLoadAssetParam Param;
+        if (m_LoadingAssetDic.TryGetValue(obj.Crc, out Param) && Param != null)
+        {
+            if (m_LoadingAssetArray[(int)Param.Priority].Contains(Param))
+            {
+                //清除这个请求的回调
+                for (int i = 0; i < Param.CallBackList.Count; i++)
+                {
+                    AsyncCallBack callBack = Param.CallBackList[i];
+                    if (callBack.ResObj == obj)
+                    {
+                        Param.CallBackList.Remove(callBack);
+                        callBack.Reset();
+                        m_AsyncCallBackPool.Recycle(callBack);
+                        break;
+                    }
+                }
+                //如果这个请求没有回调了，说明没人使用这个资源了，彻底取消加载
+                if (Param.CallBackList.Count <= 0)
+                {
+                    m_LoadingAssetDic.Remove(obj.Crc);
+                    m_LoadingAssetArray[(int)Param.Priority].Remove(Param);
+                    Param.Reset();
+                    m_AsyncLoadAssetParamPool.Recycle(Param);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    #endregion
+
     #region 加载
     public ResourceObj LoadResourceObj(string path, ResourceObj Obj)
     {
