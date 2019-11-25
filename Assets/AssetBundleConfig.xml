@@ -4,6 +4,7 @@
     <Depends>shaders</Depends>
   </ABList>
   <ABList AssetName="AssetBundleConfig.bytes" ABName="data" Crc="4111725031" path="Assets/GameData/Data/AssetBundleConfig.bytes" />
+  <ABList AssetName="LoadingPanel.prefab" ABName="loadingpanel" Crc="1594262731" path="Assets/GameData/Prefab/UGUI/Panel/LoadingPanel.prefab" />
   <ABList AssetName="benghuai.shader" ABName="shaders" Crc="2153760648" path="Assets/GameData/Shaders/benghuai.shader" />
   <ABList AssetName="Skybox.shader" ABName="shaders" Crc="2040549738" path="Assets/GameData/Shaders/Skybox.shader" />
   <ABList AssetName="Water.shader" ABName="shaders" Crc="3794094069" path="Assets/GameData/Shaders/Water.shader" />

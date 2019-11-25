@@ -170,20 +170,35 @@ public class BundleEditor
     {
         string[] allABName = AssetDatabase.GetAllAssetBundleNames();
         DirectoryInfo di = new DirectoryInfo(BUILD_AB_PATH);
-        FileInfo[] fileIfos = di.GetFiles();
-        for (int i = 0; i < fileIfos.Length; i++)
+        FileInfo[] files = di.GetFiles("*", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
         {
-            if (m_AllAssetBundleFile.Contains(fileIfos[i].FullName) || fileIfos[i].FullName.EndsWith(".meta"))
+            if (ContainABName(files[i].Name, allABName) || files[i].FullName.EndsWith(".meta") || files[i].Name.EndsWith(".manifest") || files[i].Name.EndsWith("assetbundleconfig"))
             {
                 continue;
             }
-            if (File.Exists(fileIfos[i].FullName))
+            Debug.Log(files[i].FullName + "已经改名,或者删除了");
+            if (File.Exists(files[i].FullName))
             {
-                Debug.Log(fileIfos[i].FullName + "已经改名");
-                File.Delete(fileIfos[i].FullName);
+                File.Delete(files[i].FullName);
+            }
+            if (File.Exists(files[i].FullName + ".manifest"))
+            {
+                File.Exists(files[i].FullName + ".manifest");
             }
         }
 
+    }
+
+    public static bool ContainABName(string name, string[] strs)
+    {
+        for (int i = 0; i < strs.Length; i++)
+        {
+            if (name == strs[i])
+                return true;
+
+        }
+        return false;
     }
 
     public static void SetABName(string name, string path)

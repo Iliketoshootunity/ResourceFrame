@@ -10,7 +10,7 @@ public class Window
 {
     public GameObject GameObjcet { get; set; }
     public Transform Transform { get; set; }
-    public string Name { get; set; }
+    public string WndName { get; set; }
 
     protected List<Button> m_AllButton = new List<Button>();
     protected List<Toggle> m_AllToggle = new List<Toggle>();

@@ -186,11 +186,11 @@ public class ObjectManager : Singleton<ObjectManager>
             resourceObj = ResourceManager.Instance.LoadResourceObj(path, resourceObj);
             if (resourceObj != null)
             {
-                GameObject prefab = (GameObject)resourceObj.ResItem.AssetObj;
-                resourceObj.OfflineData = prefab.GetComponent<OfflineData>();
+                GameObject prefab = (GameObject)resourceObj.ResItem.AssetObj;  
                 if (prefab != null)
                 {
-                    resourceObj.CloneObj = GameObject.Instantiate<GameObject>(prefab);
+                    resourceObj.CloneObj = GameObject.Instantiate(prefab) as GameObject;
+                    resourceObj.OfflineData = resourceObj.CloneObj.GetComponent<OfflineData>();
                 }
                 else
                 {

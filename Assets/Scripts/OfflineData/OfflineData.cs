@@ -31,10 +31,26 @@ public class OfflineData : MonoBehaviour
                 temp.localRotation = AllRot[i];
                 temp.gameObject.SetActive(AllPointActive[i]);
 
+
+                if (AllPointActive[i])
+                {
+                    if (!temp.gameObject.activeSelf)
+                    {
+                        temp.gameObject.SetActive(true);
+                    }
+                }
+                else
+                {
+                    if (temp.gameObject.activeSelf)
+                    {
+                        temp.gameObject.SetActive(false);
+                    }
+                }
+
                 int childCount = temp.childCount;
                 if (childCount > AllPointChildCount[i])
                 {
-                    for (int j = 0; j < childCount; j++)
+                    for (int j = AllPointChildCount[i]; j < childCount; j++)
                     {
                         GameObject go = temp.GetChild(j).gameObject;
                         if (!ObjectManager.Instance.IsCreateByObjectManager(go))
@@ -42,7 +58,7 @@ public class OfflineData : MonoBehaviour
                             Destroy(go);
                         }
                     }
- 
+
                 }
             }
         }

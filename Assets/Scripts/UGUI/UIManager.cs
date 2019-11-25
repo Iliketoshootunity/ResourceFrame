@@ -16,8 +16,7 @@ public class UIManager : Singleton<UIManager>
     private Camera m_UICamera;
     private EventSystem m_EventSystem;
     private float m_CanvasRate = 0;
-
-    private string m_UIPrefabPath = "Assets/GameData/Prefabs/UGUI/Panel/";
+    private string m_UIPrefabPath = "Assets/GameData/Prefab/UGUI/Panel/";
 
     private Dictionary<string, System.Type> m_RegisterDir = new Dictionary<string, System.Type>();
     private Dictionary<string, Window> m_WindowDic = new Dictionary<string, Window>();
@@ -133,7 +132,7 @@ public class UIManager : Singleton<UIManager>
     /// <param name="wndName"></param>
     /// <param name="bTop"></param>
     /// <param name="paramList"></param>
-    public Window OpenWindow(string wndName, bool bTop, params object[] paramList)
+    public Window OpenWindow(string wndName, bool bTop = true, params object[] paramList)
     {
         Window wnd = FindWindowByName(wndName);
         if (wnd == null)
@@ -163,11 +162,13 @@ public class UIManager : Singleton<UIManager>
             wnd.Transform = go.GetComponent<RectTransform>();
             go.name = wndName;
             wnd.OnAwake(paramList);
-            go.transform.SetParent(m_UIRoot.transform);
+            go.transform.SetParent(m_WindowRoot.transform);
             if (bTop)
             {
                 go.transform.SetAsLastSibling();
             }
+            go.GetComponent<UIOfflineData>().ResetProp();
+
             wnd.OnShow(paramList);
         }
         else
@@ -177,6 +178,13 @@ public class UIManager : Singleton<UIManager>
 
         return wnd;
     }
+
+    public void CloseWindow(string wndName, bool bDestory)
+    {
+        Window wnd = FindWindowByName(wndName);
+        CloseWindow(wnd);
+    }
+
     /// <summary>
     /// 关闭窗口
     /// </summary>
@@ -186,7 +194,7 @@ public class UIManager : Singleton<UIManager>
         if (m_WindowList.Contains(wnd) && m_WindowDic.ContainsValue(wnd))
         {
             m_WindowList.Remove(wnd);
-            m_WindowDic.Remove(wnd.Name);
+            m_WindowDic.Remove(wnd.WndName);
 
             wnd.OnDisable();
             wnd.OnClose();

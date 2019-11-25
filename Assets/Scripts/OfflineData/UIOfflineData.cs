@@ -11,6 +11,7 @@ public class UIOfflineData : OfflineData
     public Vector2[] AllAnchorMin;
     public Vector2[] AllPivot;
     public Vector2[] AllSizeDelta;
+    public Vector3[] AllAnchoredPos;
     public ParticleSystem[] AllParticle;
 
     public override void ResetProp()
@@ -30,10 +31,27 @@ public class UIOfflineData : OfflineData
                 temp.anchorMin = AllAnchorMin[i];
                 temp.pivot = AllPivot[i];
                 temp.sizeDelta = AllSizeDelta[i];
+                temp.anchoredPosition3D= AllAnchoredPos[i];
                 int childCount = temp.childCount;
+
+                if (AllPointActive[i])
+                {
+                    if (!temp.gameObject.activeSelf)
+                    {
+                        temp.gameObject.SetActive(true);
+                    }
+                }
+                else
+                {
+                    if (temp.gameObject.activeSelf)
+                    {
+                        temp.gameObject.SetActive(false);
+                    }
+                }
+
                 if (childCount > AllPointChildCount[i])
                 {
-                    for (int j = 0; j < childCount; j++)
+                    for (int j = AllPointChildCount[i]; j < childCount; j++)
                     {
                         GameObject go = temp.GetChild(j).gameObject;
                         if (!ObjectManager.Instance.IsCreateByObjectManager(go))
@@ -70,12 +88,12 @@ public class UIOfflineData : OfflineData
         AllPointActive = new bool[allTranformCount];
         AllPos = new Vector3[allTranformCount];
         AllScale = new Vector3[allTranformCount];
-        AllScale = new Vector3[allTranformCount];
+        AllRot = new Quaternion[allTranformCount];
         AllAhchorMax = new Vector2[allTranformCount];
         AllAnchorMin = new Vector2[allTranformCount];
         AllPivot = new Vector2[allTranformCount];
         AllSizeDelta = new Vector2[allTranformCount];
-
+        AllAnchoredPos = new Vector3[allTranformCount];
         for (int i = 0; i < allTranformCount; i++)
         {
             RectTransform rect = AllTransform[i] as RectTransform;
@@ -88,6 +106,7 @@ public class UIOfflineData : OfflineData
             AllAnchorMin[i] = rect.anchorMin;
             AllPivot[i] = rect.pivot;
             AllSizeDelta[i] = rect.sizeDelta;
+            AllAnchoredPos[i] = rect.anchoredPosition3D;
         }
     }
 

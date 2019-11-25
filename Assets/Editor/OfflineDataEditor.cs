@@ -74,7 +74,7 @@ public class OfflineDataEditor
         AssetDatabase.Refresh();
     }
 
-    [MenuItem("Assets/生成特效 离线数据")]
+    [MenuItem("Assets/生成UI 离线数据")]
     public static void AssetCreateUIData()
     {
         GameObject[] objects = Selection.gameObjects;
