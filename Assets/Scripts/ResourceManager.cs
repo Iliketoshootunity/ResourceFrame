@@ -44,6 +44,9 @@ public class ResourceObj
     //回调参数
     public object Param1, Param2, Param3;
 
+    //离线数据
+    public OfflineData OfflineData;
+
     public void Reset()
     {
         Crc = 0;
@@ -57,6 +60,8 @@ public class ResourceObj
         Param1 = null;
         Param2 = null;
         Param3 = null;
+
+        OfflineData = null;
 
     }
 }

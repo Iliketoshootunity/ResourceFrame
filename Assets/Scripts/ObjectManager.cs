@@ -75,16 +75,18 @@ public class ObjectManager : Singleton<ObjectManager>
             for (int i = objs.Count - 1; i >= 0; i--)
             {
                 ResourceObj obj = objs[i];
-                if (obj.bClear)
+                if (obj != null)
                 {
-                    int tempGUID = obj.CloneObj.GetInstanceID();
-                    obj.Reset();
-                    GameObject.Destroy(obj.CloneObj);
-                    m_ResourceObjClassPool.Recycle(obj);
-                    m_ResourceObjDic.Remove(tempGUID);
-                    objs.Remove(obj);
+                    if (obj.bClear)
+                    {
+                        int tempGUID = obj.CloneObj.GetInstanceID();
+                        obj.Reset();
+                        GameObject.Destroy(obj.CloneObj);
+                        m_ResourceObjClassPool.Recycle(obj);
+                        m_ResourceObjDic.Remove(tempGUID);
+                        objs.Remove(obj);
+                    }
                 }
-
             }
         }
         if (objs != null && objs.Count < 0)
@@ -125,6 +127,10 @@ public class ObjectManager : Singleton<ObjectManager>
             //添加ResourceItem引用
             ResourceManager.Instance.AddRefCount(obj);
             obj.bInPool = false;
+            if (System.Object.ReferenceEquals(obj.OfflineData, null))
+            {
+                obj.OfflineData.ResetProp();
+            }
 #if UNITY_EDITOR
             GameObject gameObject = obj.CloneObj;
             if (!System.Object.ReferenceEquals(obj, null))
@@ -181,6 +187,7 @@ public class ObjectManager : Singleton<ObjectManager>
             if (resourceObj != null)
             {
                 GameObject prefab = (GameObject)resourceObj.ResItem.AssetObj;
+                resourceObj.OfflineData = prefab.GetComponent<OfflineData>();
                 if (prefab != null)
                 {
                     resourceObj.CloneObj = GameObject.Instantiate<GameObject>(prefab);
@@ -288,6 +295,7 @@ public class ObjectManager : Singleton<ObjectManager>
         obj.CloneObj = GameObject.Instantiate((GameObject)obj.ResItem.AssetObj);
         if (obj.CloneObj != null)
         {
+            obj.OfflineData = obj.CloneObj.GetComponent<OfflineData>();
             //添加到已经实例化完成的GameObject字典中
             int guid = obj.CloneObj.GetInstanceID();
             if (!m_ResourceObjDic.ContainsKey(guid))
