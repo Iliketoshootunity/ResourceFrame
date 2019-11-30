@@ -363,7 +363,7 @@ public class ObjectManager : Singleton<ObjectManager>
                 }
                 else
                 {
-                    resObj.CloneObj.SetActive(true);
+                    resObj.CloneObj.SetActive(false);
                 }
             }
             else

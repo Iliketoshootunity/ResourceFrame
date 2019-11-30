@@ -50,6 +50,16 @@ public class Window
         }
         return false;
     }
+
+    public void AsyncChangeImageSprite(string path, Image image, bool setNativeSize = false)
+    {
+        if (image == null)
+        {
+            return;
+        }
+        ResourceManager.Instance.AsyncLoadAsset(path, EAysncLoadPriority.Midddle, OnChangeImageSpriteFinished, isSprite: true, parem1: image, parem2: setNativeSize);
+    }
+
     public void AddButtonClickListener(Button btn, UnityAction action)
     {
         if (btn == null) return;
@@ -102,6 +112,25 @@ public class Window
     protected virtual void PlaySoundOnToggleChanged(bool value)
     {
 
+    }
+
+    protected virtual void OnChangeImageSpriteFinished(string path, Object obj, object param1, object param2, object param3)
+    {
+        if (obj)
+        {
+            Sprite sp = obj as Sprite;
+            Image image = param1 as Image;
+            bool setNativeSize = (bool)param2;
+            if (image == null) return;
+            if (sp != null)
+            {
+                if (image.sprite != null) image.sprite = null;
+                image.sprite = sp;
+                if (setNativeSize) image.SetNativeSize();
+                return;
+            }
+
+        }
     }
 
 }

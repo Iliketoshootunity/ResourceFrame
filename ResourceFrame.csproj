@@ -258,6 +258,7 @@
     <Compile Include="Assets\Scripts\GameMap\ConStr.cs" />
     <Compile Include="Assets\Scripts\GameMap\GameMapManager.cs" />
     <Compile Include="Assets\Scripts\GameStart.cs" />
+    <Compile Include="Assets\Scripts\MenuMode.cs" />
     <Compile Include="Assets\Scripts\ObjectManager.cs" />
     <Compile Include="Assets\Scripts\OfflineData\EffectOfflineData.cs" />
     <Compile Include="Assets\Scripts\OfflineData\OfflineData.cs" />
@@ -267,9 +268,11 @@
     <Compile Include="Assets\Scripts\SerilizeDemo\XMLMono.cs" />
     <Compile Include="Assets\Scripts\Singleton.cs" />
     <Compile Include="Assets\Scripts\UGUI\Panel\LoadingPanel.cs" />
+    <Compile Include="Assets\Scripts\UGUI\Panel\MenuPanel.cs" />
     <Compile Include="Assets\Scripts\UGUI\UIManager.cs" />
     <Compile Include="Assets\Scripts\UGUI\Window.cs" />
     <Compile Include="Assets\Scripts\UGUI\Window\LoadingWindow.cs" />
+    <Compile Include="Assets\Scripts\UGUI\Window\MenuWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AssetBundleConfig.xml" />

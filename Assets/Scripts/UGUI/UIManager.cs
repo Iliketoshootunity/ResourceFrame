@@ -160,7 +160,7 @@ public class UIManager : Singleton<UIManager>
 
             wnd.GameObjcet = go;
             wnd.Transform = go.GetComponent<RectTransform>();
-            go.name = wndName;
+            wnd.WndName = wndName;
             wnd.OnAwake(paramList);
             go.transform.SetParent(m_WindowRoot.transform);
             if (bTop)

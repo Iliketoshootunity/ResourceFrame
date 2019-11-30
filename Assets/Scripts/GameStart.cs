@@ -11,16 +11,21 @@ public class GameStart : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        DontDestroyOnLoad(this.gameObject);
+
         Transform spawnTrs = transform.Find("SpawnTrs");
         Transform recycleTrs = transform.Find("RecycleTrs");
         AssetBundleManager.Instance.LoadAssetBundleConfig();
         ResourceManager.Instance.Init(this);
         ObjectManager.Instance.Init(spawnTrs, recycleTrs);
-
+        GameMapManager.Instance.Init(this);
 
         UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
         UIManager.Instance.RegisterWindow<LoadingWindow>(ConStr.LOADINGPANEL);
-        UIManager.Instance.OpenWindow(ConStr.LOADINGPANEL);
+        UIManager.Instance.RegisterWindow<MenuWindow>(ConStr.MENUPANEL);
+        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefab/Cube.prefab");
+
+        GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
     }
 
 

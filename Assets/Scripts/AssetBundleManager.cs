@@ -24,7 +24,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     public bool LoadAssetBundleConfig()
     {
         //反序列化AssetBundle config
-        AssetBundle configAB = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/data");
+        AssetBundle configAB = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/assetbundleconfig");
         if (configAB == null)
         {
             Debug.LogError("AssetBundleconfig的AB包未加载到");

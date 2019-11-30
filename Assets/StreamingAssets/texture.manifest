@@ -1,16 +1,18 @@
 ManifestFileVersion: 0
-CRC: 3649229039
+CRC: 569709848
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 29a6e5724fd1fdc7d88c237beaa14fb8
+    Hash: f74e9c3fc37c34e8855876cfeb161da7
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+    Hash: 460b4f5d62b6facbccf7c01637df8f00
 HashAppended: 0
 ClassTypes:
-- Class: 49
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
   Script: {instanceID: 0}
 Assets:
-- Assets/GameData/Data/AssetBundleConfig.bytes
+- Assets/GameData/Texture/Test1.png
 Dependencies: []

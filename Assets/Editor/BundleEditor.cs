@@ -19,27 +19,27 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public class BundleEditor
 {
-    public static string ASSETBUNDLE_CONFIG_PATH = Application.dataPath + "/GameData/Data";
+    public static string ABBYTEPATH = "Assets/GameData/Data/AssetBundleConfig.bytes";
     public static string BUILD_AB_PATH = Application.streamingAssetsPath;
-    public static string ABPATHCONFIG_PATH = "Assets/Editor/ABPathConfig.asset";
+    public static string ABPATHCONFIGPATH = "Assets/Editor/ABPathConfig.asset";
 
     //所有的基于文件夹的Ab包： Key是Ab包名，value 是路径
-    public static Dictionary<string, string> m_Dir_ABNameToPath = new Dictionary<string, string>();
+    public static Dictionary<string, string> m_AllAssetFile = new Dictionary<string, string>();
     //所有的基于Prefab来查找资源的Ab包，key是物体名字，value是所依赖资源的路径
-    public static Dictionary<string, List<string>> m_Prefab_ObjNameToDependPath = new Dictionary<string, List<string>>();
+    public static Dictionary<string, List<string>> m_AllPrefabFile = new Dictionary<string, List<string>>();
     //所有的AssetBundle文件（不是AB包，一个AB包包含多个资源），文件夹作过滤
-    public static List<string> m_AllAssetBundleFile = new List<string>();
+    public static List<string> m_AllABFile = new List<string>();
     //所有的配置的文件夹AB和Prefab AB
     public static List<string> m_ConfigFileList = new List<string>();
 
     [MenuItem("Tool/BuildAB")]
     public static void BuildAB()
     {
-        m_Dir_ABNameToPath.Clear();
-        m_AllAssetBundleFile.Clear();
-        m_Prefab_ObjNameToDependPath.Clear();
+        m_AllAssetFile.Clear();
+        m_AllABFile.Clear();
+        m_AllPrefabFile.Clear();
         m_ConfigFileList.Clear();
-        ABPathConfig config = AssetDatabase.LoadAssetAtPath<ABPathConfig>(ABPATHCONFIG_PATH);
+        ABPathConfig config = AssetDatabase.LoadAssetAtPath<ABPathConfig>(ABPATHCONFIGPATH);
         if (config == null)
         {
             return;
@@ -48,14 +48,14 @@ public class BundleEditor
         //文件夹
         foreach (var item in config.DirPathArr)
         {
-            if (m_Dir_ABNameToPath.ContainsKey(item.ABName))
+            if (m_AllAssetFile.ContainsKey(item.ABName))
             {
                 Debug.Log("文件AB包名重复，请检查!!!!!!!!!!!!!!!!!!!!!!");
             }
             else
             {
-                m_Dir_ABNameToPath.Add(item.ABName, item.Path);
-                m_AllAssetBundleFile.Add(item.Path);
+                m_AllAssetFile.Add(item.ABName, item.Path);
+                m_AllABFile.Add(item.Path);
                 m_ConfigFileList.Add(item.Path);
             }
         }
@@ -81,29 +81,29 @@ public class BundleEditor
                 {
                     if (!ContainAllAssetPath(denpendAssePathtArr[j]) && !denpendAssePathtArr[j].EndsWith(".cs"))
                     {
-                        m_AllAssetBundleFile.Add(denpendAssePathtArr[j]);
+                        m_AllABFile.Add(denpendAssePathtArr[j]);
                         denpendAssetPathList.Add(denpendAssePathtArr[j]);
                     }
                 }
-                if (m_Prefab_ObjNameToDependPath.ContainsKey(go.name))
+                if (m_AllPrefabFile.ContainsKey(go.name))
                 {
-                    Debug.LogErrorFormat("%s 与 %s 的预制体重名 这个预制体将不会参与打包，请检查", prefabPath, m_Prefab_ObjNameToDependPath[go.name]);
+                    Debug.LogErrorFormat("%s 与 %s 的预制体重名 这个预制体将不会参与打包，请检查", prefabPath, m_AllPrefabFile[go.name]);
                 }
                 else
                 {
-                    m_Prefab_ObjNameToDependPath.Add(go.name, denpendAssetPathList);
+                    m_AllPrefabFile.Add(go.name, denpendAssetPathList);
                 }
 
             }
         }
 
         //设置AssetBundle的后缀
-        foreach (var item in m_Dir_ABNameToPath)
+        foreach (var item in m_AllAssetFile)
         {
             SetABName(item.Key, item.Value);
         }
 
-        foreach (var item in m_Prefab_ObjNameToDependPath)
+        foreach (var item in m_AllPrefabFile)
         {
             SetABName(item.Key, item.Value);
         }
@@ -127,7 +127,7 @@ public class BundleEditor
     {
         //找到所有的AssetBundle
         string[] allAbName = AssetDatabase.GetAllAssetBundleNames();
-        //key是资源的全路径 value是包名
+        //所有的资源，key是资源的全路径 value是AB包名
         Dictionary<string, string> assetPathDic = new Dictionary<string, string>();
         for (int i = 0; i < allAbName.Length; i++)
         {
@@ -148,18 +148,31 @@ public class BundleEditor
         AssetBundleConfig config = CreateConfig(assetPathDic);
 
         //序列成XML
-        FileStream fs = new FileStream(Application.dataPath + "/AssetBundleConfig.xml", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+        string xmlPath = Application.dataPath + "/AssetBundleConfig.xml";
+        if (File.Exists(xmlPath))
+        {
+            File.Delete(xmlPath);
+        }
+        FileStream fs = new FileStream(xmlPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
         StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8);
         XmlSerializer xs = new XmlSerializer(typeof(AssetBundleConfig));
         xs.Serialize(sw, config);
         sw.Close();
         fs.Close();
 
+
+
         //序列化成二进制文件
-        FileStream fs1 = new FileStream(ASSETBUNDLE_CONFIG_PATH + "/AssetBundleConfig.bytes", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+        FileStream fs1 = new FileStream(ABBYTEPATH, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+        fs1.Seek(0, SeekOrigin.Begin);
+        fs1.SetLength(0);
         BinaryFormatter bf = new BinaryFormatter();
         bf.Serialize(fs1, config);
         fs1.Close();
+        //刷新上一步后的资源目录
+        AssetDatabase.Refresh();
+        SetABName("assetbundleconfig", ABBYTEPATH);
+
         //打包
         BuildPipeline.BuildAssetBundles(BUILD_AB_PATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
     }
@@ -224,17 +237,17 @@ public class BundleEditor
 
     public static bool ContainAllAssetPath(string path)
     {
-        for (int i = 0; i < m_AllAssetBundleFile.Count; i++)
+        for (int i = 0; i < m_AllABFile.Count; i++)
         {
-            if (path == m_AllAssetBundleFile[i])
+            if (path == m_AllABFile[i])
             {
                 return true;
             }
             //path在m_AllFileAB[i],且m_AllFileAB[i]后无路径，说明且m_AllFileAB[i]是个需要打包的文件夹
             //且path在这个文件夹内，说明不再需要被打包
-            if (path.Contains(m_AllAssetBundleFile[i]))
+            if (path.Contains(m_AllABFile[i]))
             {
-                if (path.Replace(m_AllAssetBundleFile[i], "")[0] == '/')
+                if (path.Replace(m_AllABFile[i], "")[0] == '/')
                 {
                     return true;
 
@@ -246,7 +259,7 @@ public class BundleEditor
     /// <summary>
     /// 生成资源配置表
     /// </summary>
-    /// <param name="assetPathDic"></param>
+    /// <param name="assetPathDic">所有的资源Key 是路径，Value是AB包名</param>
     public static AssetBundleConfig CreateConfig(Dictionary<string, string> assetPathDic)
     {
         AssetBundleConfig config = new AssetBundleConfig();
@@ -263,10 +276,10 @@ public class BundleEditor
             baseAB.Path = item.Key;
             baseAB.Crc = Crc32.GetCrc32(baseAB.Path);
             baseAB.Depends = new List<string>();
+            //资源依赖项
             string[] allDependAssetPathArr = AssetDatabase.GetDependencies(baseAB.Path);
             for (int i = 0; i < allDependAssetPathArr.Length; i++)
             {
-
                 //自身
                 if (allDependAssetPathArr[i] == baseAB.Path)
                     continue;
@@ -274,9 +287,11 @@ public class BundleEditor
                 if (allDependAssetPathArr[i].EndsWith(".cs"))
                     continue;
                 string abName = "";
+                //判断资源的依赖项
                 if (assetPathDic.TryGetValue(allDependAssetPathArr[i], out abName))
                 {
-                    //如果这个依赖的资源和本身在同一个包，则不添加依赖
+                    //如果这个依赖的资源和本身在同一个包，则不添加
+                    //按照规则，这是Prefab依赖的资源
                     if (abName == baseAB.ABName)
                     {
                         continue;

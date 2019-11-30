@@ -23,6 +23,14 @@ public class GameMapManager : Singleton<GameMapManager>
     {
         m_Mono = mono;
     }
+
+    public void LoadScene(string sceneName)
+    {
+        LoadingProgress = 0;
+        m_Mono.StartCoroutine(LoadSceneAsync(sceneName));
+        UIManager.Instance.OpenWindow(ConStr.LOADINGPANEL, true, sceneName);
+    }
+
     /// <summary>
     /// 设置场景内容
     /// </summary>

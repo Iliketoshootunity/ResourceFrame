@@ -74,6 +74,7 @@ public class AsyncLoadAssetParam
     public List<AsyncCallBack> CallBackList = new List<AsyncCallBack>();
     public uint Crc;
     public string Path;
+    public bool bIsSprite;
     public EAysncLoadPriority Priority = EAysncLoadPriority.Slow;
 
     public void Reset()
@@ -82,6 +83,7 @@ public class AsyncLoadAssetParam
         Crc = 0;
         Path = "";
         Priority = EAysncLoadPriority.Slow;
+        bIsSprite = false;
     }
 }
 
@@ -439,7 +441,7 @@ public class ResourceManager : Singleton<ResourceManager>
     /// 异步加载不需要实例化的资源
     /// </summary>
     /// <param name="path"></param>
-    public void AsyncLoadAsset(string path, EAysncLoadPriority loadPriority, OnAsyncObjFinsih finishCallBack, Object parem1 = null, Object parem2 = null, Object parem3 = null, uint crc = 0)
+    public void AsyncLoadAsset(string path, EAysncLoadPriority loadPriority, OnAsyncObjFinsih finishCallBack, bool isSprite = false, object parem1 = null, object parem2 = null, object parem3 = null, uint crc = 0)
     {
         if (crc == 0)
         {
@@ -463,6 +465,7 @@ public class ResourceManager : Singleton<ResourceManager>
             loadingAsset.Crc = crc;
             loadingAsset.Path = path;
             loadingAsset.Priority = loadPriority;
+            loadingAsset.bIsSprite = isSprite;
         }
         //添加回调
         AsyncCallBack callBack = m_AsyncCallBackPool.Spawn(true);
@@ -512,7 +515,14 @@ public class ResourceManager : Singleton<ResourceManager>
 #if UNITY_EDITOR
                 if (m_LoadAssetFormEditor)
                 {
-                    obj = LoadAssetFromEditor<Object>(loadAsset.Path);
+                    if (loadAsset.bIsSprite)
+                    {
+                        obj = LoadAssetFromEditor<Sprite>(loadAsset.Path);
+                    }
+                    else
+                    {
+                        obj = LoadAssetFromEditor<Object>(loadAsset.Path);
+                    }
                     //模拟异步
                     yield return new WaitForSeconds(0.5f);
                     item = AssetBundleManager.Instance.FindResourceItem(loadAsset.Crc);
@@ -531,8 +541,15 @@ public class ResourceManager : Singleton<ResourceManager>
                     item = AssetBundleManager.Instance.LoadResourceItem(loadAsset.Crc);
                     if (item != null)
                     {
-
-                        AssetBundleRequest request = item.AssetBundle.LoadAssetAsync(item.AssetName);
+                        AssetBundleRequest request = null;
+                        if (loadAsset.bIsSprite)
+                        {
+                            request = item.AssetBundle.LoadAssetAsync<Sprite>(item.AssetName);
+                        }
+                        else
+                        {
+                            request = item.AssetBundle.LoadAssetAsync(item.AssetName);
+                        }
                         yield return request;
                         if (request.isDone)
                         {

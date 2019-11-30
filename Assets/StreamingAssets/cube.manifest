@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1466537707
+CRC: 1050844993
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 2d65b53a03e130151310ea5e0292c2ca
+    Hash: faccdc4f32458885d52fc40f15cda338
   TypeTreeHash:
     serializedVersion: 2
     Hash: 12f7c6a659c16ff58a3397c61a0a8ea7
@@ -26,5 +26,5 @@ ClassTypes:
 - Class: 65
   Script: {instanceID: 0}
 Assets:
-- Assets/GameData/Prefab/UGUI/Cube.prefab
+- Assets/GameData/Prefab/Cube.prefab
 Dependencies: []
