@@ -20,7 +20,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class BundleEditor
 {
     public static string ABBYTEPATH = "Assets/GameData/Data/AssetBundleConfig.bytes";
-    public static string BUILD_AB_PATH = Application.streamingAssetsPath;
+    public static string BUILDTARGETPATH = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();
     public static string ABPATHCONFIGPATH = "Assets/Editor/ABPathConfig.asset";
 
     //所有的基于文件夹的Ab包： Key是Ab包名，value 是路径
@@ -173,8 +173,13 @@ public class BundleEditor
         AssetDatabase.Refresh();
         SetABName("assetbundleconfig", ABBYTEPATH);
 
+        if(!Directory.Exists(BUILDTARGETPATH))
+        {
+            Directory.CreateDirectory(BUILDTARGETPATH);
+        }
+
         //打包
-        BuildPipeline.BuildAssetBundles(BUILD_AB_PATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+        BuildPipeline.BuildAssetBundles(BUILDTARGETPATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
     }
     /// <summary>
     /// 增量删除多余的AB包
@@ -182,7 +187,7 @@ public class BundleEditor
     public static void IncrementalDeleteAB()
     {
         string[] allABName = AssetDatabase.GetAllAssetBundleNames();
-        DirectoryInfo di = new DirectoryInfo(BUILD_AB_PATH);
+        DirectoryInfo di = new DirectoryInfo(BUILDTARGETPATH);
         FileInfo[] files = di.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {

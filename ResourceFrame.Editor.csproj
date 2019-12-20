@@ -308,6 +308,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Editor\ABPathConfig.cs" />
+    <Compile Include="Assets\Editor\BuildApp.cs" />
     <Compile Include="Assets\Editor\BundleEditor.cs" />
     <Compile Include="Assets\Editor\OfflineDataEditor.cs" />
   </ItemGroup>
