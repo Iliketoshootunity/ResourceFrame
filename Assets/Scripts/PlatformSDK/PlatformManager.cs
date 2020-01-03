@@ -40,6 +40,7 @@ public class PlatformManager : Singleton<PlatformManager>
     /// <param name="type"></param>
     public int GetIntFromPlatfrom(int type)
     {
+        if(GameHelperClass==null)return o;
         return GameHelperClass.Call<int>("GetIntFromPlatfrom", type);
     }
     /// <summary>
