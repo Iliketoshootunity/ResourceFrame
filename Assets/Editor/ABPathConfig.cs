@@ -6,14 +6,14 @@ using UnityEngine;
 public class ABPathConfig : ScriptableObject
 {
     //基于prefab打包路径 每个Prefab的名字必须是唯一的
-    [Header("基于prefab打包路径")]
-    public List<string> PrefabDirPathArr = new List<string>();
+    [Header("预制体资源路径")]
+    public List<string> PrefabAssetDirectorys = new List<string>();
     //基于文件打包路径
-    [Header("基于文件打包路径")]
-    public List<DirAB> DirPathArr = new List<DirAB>();
+    [Header("其他资源路径")]
+    public List<OtherDirectoryConfig> OtherAssetDirectorys = new List<OtherDirectoryConfig>();
 
     [System.Serializable]
-    public struct DirAB
+    public struct OtherDirectoryConfig
     {
         public string ABName;
         public string Path;

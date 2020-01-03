@@ -739,6 +739,15 @@ public class ResourceManager : Singleton<ResourceManager>
     /// </summary>
     public void WaskOut()
     {
+        //可以使用剩余内存大小判断是否淘汰
+        while (PlatformManager.Instance.GetLongFromPlatfrom(2) / (1024.0f * 1024.0f) < 100)
+        {
+            ResourceItem item = m_NoRefreceAssetMapList.Back();
+            if (item != null)
+            {
+                DestoryResourceItem(item, true);
+            }
+        }
         while (m_NoRefreceAssetMapList.Size() >= MAXCACHECOUNT)
         {
             for (int i = 0; i < MAXCACHECOUNT / 2; i++)
@@ -748,9 +757,7 @@ public class ResourceManager : Singleton<ResourceManager>
                 {
                     DestoryResourceItem(item, true);
                 }
-
             }
-
         }
     }
     #endregion
@@ -820,9 +827,6 @@ public class ResourceManager : Singleton<ResourceManager>
 
     }
     #endregion
-
-
-
 
 
 }

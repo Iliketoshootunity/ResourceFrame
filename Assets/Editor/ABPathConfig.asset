@@ -11,12 +11,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 526116dd63851e74293299784bb6cac2, type: 3}
   m_Name: ABPathConfig
   m_EditorClassIdentifier: 
-  PrefabDirPathArr:
+  PrefabAssetDirectorys:
   - Assets/GameData/Prefab
-  DirPathArr:
-  - ABName: sounds
-    Path: Assets/GameData/Sounds
-  - ABName: shaders
+  OtherAssetDirectorys:
+  - ABName: Shaders
     Path: Assets/GameData/Shaders
-  - ABName: Texture
-    Path: Assets/GameData/Texture
+  - ABName: Sounds
+    Path: Assets/GameData/Sounds

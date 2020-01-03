@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 public class GameStart : MonoBehaviour
@@ -11,6 +12,9 @@ public class GameStart : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("总内存：" + PlatformManager.Instance.GetLongFromPlatfrom(1) / 1024.0f / 1024.0f);
+        Debug.Log("剩余内存：" + PlatformManager.Instance.GetLongFromPlatfrom(2) / 1024.0f / 1024.0f);
+        Debug.Log("使用内存：" + PlatformManager.Instance.GetLongFromPlatfrom(3) / 1024.0f / 1024.0f);
         DontDestroyOnLoad(this.gameObject);
 
         Transform spawnTrs = transform.Find("SpawnTrs");

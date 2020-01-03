@@ -12,5 +12,4 @@
   <ABList AssetName="Xray.shader" ABName="shaders" Crc="2720758644" path="Assets/GameData/Shaders/Xray.shader" />
   <ABList AssetName="menusound.mp3" ABName="sounds" Crc="1701716301" path="Assets/GameData/Sounds/menusound.mp3" />
   <ABList AssetName="senlin.mp3" ABName="sounds" Crc="662225670" path="Assets/GameData/Sounds/senlin.mp3" />
-  <ABList AssetName="Test1.png" ABName="texture" Crc="2184016553" path="Assets/GameData/Texture/Test1.png" />
 </AssetBundleConfig>
