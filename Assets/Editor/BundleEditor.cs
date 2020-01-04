@@ -29,7 +29,7 @@ public class BundleEditor
     public static Dictionary<string, string> m_OtherAssetBundles = new Dictionary<string, string>();
     //资源文件列表
     //同一个资源不会添加两次(Prefab引用的资源在Other AssetBundle 包 里面时，不会添加)
-    public static List<string> m_Assets = new List<string>();
+    public static List<string> m_AssetFiles = new List<string>();
     //配置的AssetBundle路径列表
     public static List<string> m_ConfigAssetBundles = new List<string>();
 
@@ -37,7 +37,7 @@ public class BundleEditor
     public static void BuildAB()
     {
         m_OtherAssetBundles.Clear();
-        m_Assets.Clear();
+        m_AssetFiles.Clear();
         m_PrefabAssetBundles.Clear();
         m_ConfigAssetBundles.Clear();
         ABPathConfig config = AssetDatabase.LoadAssetAtPath<ABPathConfig>(AB_PATH_CONFIG_PATH);
@@ -56,7 +56,7 @@ public class BundleEditor
             else
             {
                 m_OtherAssetBundles.Add(item.ABName, item.Path);
-                m_Assets.Add(item.Path);
+                m_AssetFiles.Add(item.Path);
                 m_ConfigAssetBundles.Add(item.Path);
             }
         }
@@ -81,7 +81,7 @@ public class BundleEditor
                 {
                     if (!ContainAllAssetPath(denpendAssePathtArr[j]) && !denpendAssePathtArr[j].EndsWith(".cs"))
                     {
-                        m_Assets.Add(denpendAssePathtArr[j]);
+                        m_AssetFiles.Add(denpendAssePathtArr[j]);
                         denpendAssetPathList.Add(denpendAssePathtArr[j]);
                     }
                 }
@@ -248,17 +248,17 @@ public class BundleEditor
 
     public static bool ContainAllAssetPath(string path)
     {
-        for (int i = 0; i < m_Assets.Count; i++)
+        for (int i = 0; i < m_AssetFiles.Count; i++)
         {
-            if (path == m_Assets[i])
+            if (path == m_AssetFiles[i])
             {
                 return true;
             }
             //如果这个是个文件夹
-            if (Directory.Exists(m_Assets[i]))
+            if (Directory.Exists(m_AssetFiles[i]))
             {
                 //如果此路径在这个文件夹内
-                if(path.Contains(m_Assets[i]))
+                if(path.Contains(m_AssetFiles[i]))
                 {
                     return true;
                 }

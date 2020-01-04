@@ -431,9 +431,6 @@ public class ResourceManager : Singleton<ResourceManager>
         AsyncCallBack callBack = m_AsyncCallBackPool.Spawn(true);
         callBack.ResObj = obj;
         callBack.OnAsyncResObjLoadFinished = finishCallBack;
-        //callBack.Param1 = obj.Param1;
-        //callBack.Param2 = obj.Param2;
-        //callBack.Param3 = obj.Param3;
         asyncParam.CallBackList.Add(callBack);
     }
 
