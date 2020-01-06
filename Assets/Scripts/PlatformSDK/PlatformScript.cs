@@ -19,6 +19,9 @@ public class PlatformScript : MonoBehaviour
 
     private Queue<PlatformMsg> PlatformMsgList = new Queue<PlatformMsg>();
 
+    private const int PLATFORM_MSG_QQLOGINCALLBACK = 1;     //qq登陆回调
+
+    private const int PLATFORM_MSG_QQLOGOUTCALLBACK = 2;    //qq登出回调
     /// <summary>
     /// 接收来自平台的消息
     /// </summary>
@@ -46,6 +49,16 @@ public class PlatformScript : MonoBehaviour
             //处理消息
             switch (Msg.iMsgId)
             {
+                case PLATFORM_MSG_QQLOGINCALLBACK:
+                    JsonData qqData = Msg.strParam1;
+                    int qqResult = Msg.iParam1;
+                    PhoneManager.Instance.LoginCallBack(qqData, PlatType.QQ, qqResult);
+                    break;
+                case PLATFORM_MSG_QQLOGOUTCALLBACK:
+                    JsonData wxData = Msg.strParam1;
+                    int wxResult = Msg.iParam1;
+                    PhoneManager.Instance.LoginCallBack(wxData, PlatType.WX, wxResult);
+                    break;
                 default:
                     break;
             }

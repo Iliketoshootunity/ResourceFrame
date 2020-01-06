@@ -737,7 +737,7 @@ public class ResourceManager : Singleton<ResourceManager>
     public void WaskOut()
     {
         //可以使用剩余内存大小判断是否淘汰
-        while (PlatformManager.Instance.GetLongFromPlatfrom(2) / (1024.0f * 1024.0f) < 100)
+        while (PlatformManager.Instance.GetLongFromPlatform(2) / (1024.0f * 1024.0f) < 100)
         {
             ResourceItem item = m_NoRefreceAssetMapList.Back();
             if (item != null)

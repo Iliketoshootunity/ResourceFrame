@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using LitJson;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -15,14 +17,24 @@ public class PlatformManager : Singleton<PlatformManager>
         if (!Application.isPlaying) return;
         GameObject.DontDestroyOnLoad(m_PlatformObj);
 #if UNITY_ANDROID && !UNITY_EDITOR
-        GameHelperClass = new AndroidJavaClass("com.Custom.MyGame.GameHelperper");
+        GameHelperClass = new AndroidJavaClass("com.Custom.MyGame.GameHelper");
         Debug.Log("Init com.Custom.MyGame.GameHelperper");
 #endif
     }
 
-    private const int TOTAL_MEMORY = 1;                 //总内存 
-    private const int REMAINING_MEMORY = 2;             //剩余内存
-    private const int USEDD_MEMORY = 3;                 //使用的内存
+
+
+    //从底层获取Long数据
+    public const int TOTAL_MEMORY = 1;                 //总内存 
+    public const int REMAINING_MEMORY = 2;             //剩余内存
+    public const int USEDD_MEMORY = 3;                 //使用的内存
+
+    //发送消息到平台
+    public const int PLATFORM_MSG_QQLOGIN = 1;//QQ登录
+    public const int PLATFORM_MSG_QQLOGOUT = 2;//QQ注销
+    public const int PLATFORM_MSG_WXLOGIN = 3;//WX登录
+    public const int PLATFORM_MSG_WXLOGOUT = 4;//WX注销
+
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     private AndroidJavaClass GameHelperClass;
@@ -30,36 +42,39 @@ public class PlatformManager : Singleton<PlatformManager>
     /// <summary>
     /// 发送消息给平台
     /// </summary>
-    public void SendUnityMsgToPlatform(int iMsg, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
+    public void SendUnityMsgToPlatform(int iMsg, int iParam1 = 0, int iParam2 = 0, int iParam3 = 0, string strParam1 = "", string strParam2 = "", string strParam3 = "")
     {
+        if (GameHelperClass == null) return;
         GameHelperClass.CallStatic("SendUnityMsgToPlatform", iMsg, iParam1, iParam2, iParam3, strParam1, strParam2, strParam3);
     }
     /// <summary>
     /// 从平台获取int数据
     /// </summary>
     /// <param name="type"></param>
-    public int GetIntFromPlatfrom(int type)
+    public int GetIntFromPlatform(int type)
     {
-        if(GameHelperClass==null)return o;
-        return GameHelperClass.Call<int>("GetIntFromPlatfrom", type);
+        if (GameHelperClass == null) return 0;
+        return GameHelperClass.Call<int>("GetIntFromPlatform", type);
     }
     /// <summary>
     /// 从平台获取long数据
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public long GetLongFromPlatfrom(int type)
+    public long GetLongFromPlatform(int type)
     {
-        return GameHelperClass.Call<long>("GetLongFromPlatfrom", type);
+        if (GameHelperClass == null) return 0;
+        return GameHelperClass.Call<long>("GetLongFromPlatform", type);
     }
     /// <summary>
     /// 从平台获取long数据
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public long GetLongFromPlatfrom(int type, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
+    public long GetLongFromPlatform2(int type, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
     {
-        return GameHelperClass.Call<long>("GetLongFromPlatfrom", type, iParam1, iParam2, iParam3, strParam1, strParam2, strParam3);
+        if (GameHelperClass == null) return 0;
+        return GameHelperClass.Call<long>("GetLongFromPlatform2", type, iParam1, iParam2, iParam3, strParam1, strParam2, strParam3);
     }
     /// <summary>
     /// 从平台获取string数据
@@ -68,6 +83,7 @@ public class PlatformManager : Singleton<PlatformManager>
     /// <returns></returns>
     public string GetStringFromPlatform(int type)
     {
+        if (GameHelperClass == null) return "";
         return GameHelperClass.Call<string>("GetStringFromPlatform", type);
     }
 #else
@@ -78,7 +94,7 @@ public class PlatformManager : Singleton<PlatformManager>
     /// <summary>
     /// 发送消息给平台
     /// </summary>
-    public void SendUnityMsgToPlatform(int iMsg, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
+    public void SendUnityMsgToPlatform(int iMsg, int iParam1 = 0, int iParam2 = 0, int iParam3 = 0, string strParam1 = "", string strParam2 = "", string strParam3 = "")
     {
 
     }
@@ -86,7 +102,7 @@ public class PlatformManager : Singleton<PlatformManager>
     /// 从平台获取int数据
     /// </summary>
     /// <param name="type"></param>
-    public int GetIntFromPlatfrom(int type)
+    public int GetIntFromPlatform(int type)
     {
         return 0;
     }
@@ -95,14 +111,14 @@ public class PlatformManager : Singleton<PlatformManager>
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public long GetLongFromPlatfrom(int type)
+    public long GetLongFromPlatform(int type)
     {
         switch (type)
         {
             case TOTAL_MEMORY:
                 return (long)GetTotalMemory();
             case REMAINING_MEMORY:
-                return (long)GetRemaingMemory();             
+                return (long)GetRemaingMemory();
             case USEDD_MEMORY:
                 return GetUsedMemory();
             default:
@@ -114,7 +130,7 @@ public class PlatformManager : Singleton<PlatformManager>
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public long GetLongFromPlatfrom(int type, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
+    public long GetLongFromPlatform2(int type, int iParam1, int iParam2, int iParam3, string strParam1, string strParam2, string strParam3)
     {
         return 0;
     }
