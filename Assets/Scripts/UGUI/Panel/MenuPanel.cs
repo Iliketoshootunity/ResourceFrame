@@ -7,5 +7,10 @@ public class MenuPanel : MonoBehaviour {
 
     public Image Sprite1;
     public Image Sprite2;
+
+    public GameObject LoginObj;
+    public Button QQLoginBtn;
+    public Button WXLoginBtn;
+    public Button LogOutBtn;
     
 }

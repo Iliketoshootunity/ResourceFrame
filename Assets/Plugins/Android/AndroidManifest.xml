@@ -25,7 +25,7 @@
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
     </activity>
 
-    <!--QQ登录-->
+    <!--QQ登录 tencent1056898435 修改AppId-->
     <activity android:name="com.tencent.tauth.AuthActivity" android:noHistory="true" android:launchMode="singleTask" >
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />

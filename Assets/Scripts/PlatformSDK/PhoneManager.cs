@@ -21,6 +21,7 @@ public class PhoneManager : Singleton<PhoneManager>
     public Action<PlatType> LoginFailed;
     public Action<PlatType> LoginCancle;
 
+    private PlatType CurPlatType;
 
     private const int UNITY_GET_QQAUTORVAILD = 1;       ////qq是否过期
     private const int UNITY_GET_QQREFRESHSESSION = 2;  // //qq 刷新并获取票据
@@ -44,9 +45,16 @@ public class PhoneManager : Singleton<PhoneManager>
     /// <summary>
     /// 登出
     /// </summary>
-    public void LoginOut()
+    public void LogOut()
     {
-
+        if (CurPlatType == PlatType.QQ)
+        {
+            PlatformManager.Instance.SendUnityMsgToPlatform(PlatformManager.PLATFORM_MSG_QQLOGOUT);
+        }
+        else if (CurPlatType == PlatType.WX)
+        {
+            PlatformManager.Instance.SendUnityMsgToPlatform(PlatformManager.PLATFORM_MSG_WXLOGOUT);
+        }
     }
 
     /// <summary>
@@ -98,6 +106,7 @@ public class PhoneManager : Singleton<PhoneManager>
                 string opunionidenid = (string)data["unionid"];
                 string token = (string)data["token"];
                 IsLogin = true;
+                CurPlatType = platType;
                 if (LoginSuccess != null)
                 {
                     LoginSuccess(platType);
