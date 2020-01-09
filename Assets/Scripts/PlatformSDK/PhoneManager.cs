@@ -23,9 +23,10 @@ public class PhoneManager : Singleton<PhoneManager>
 
     private PlatType CurPlatType;
 
-    private const int UNITY_GET_QQAUTORVAILD = 1;       ////qq是否过期
-    private const int UNITY_GET_QQREFRESHSESSION = 2;  // //qq 刷新并获取票据
-
+    private const int UNITY_GET_STRING_QQAUTORVAILD = 1;       ////qq是否过期
+    private const int UNITY_GET_STRING_QQREFRESHSESSION = 2;  // //qq 刷新并获取票据
+    private const int UNITY_GET_STRING_WXAUTORVAILD = 3;       ////WX是否过期
+    private const int UNITY_GET_STRING_WXREFRESHSESSION = 4;  // //WX 刷新并获取票据
 
     /// <summary>
     /// 登陆
@@ -63,7 +64,7 @@ public class PhoneManager : Singleton<PhoneManager>
     /// <returns></returns>
     public bool QQAnthorVaild()
     {
-        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_QQAUTORVAILD);
+        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_STRING_QQAUTORVAILD);
         return Convert.ToBoolean(str);
     }
 
@@ -73,7 +74,29 @@ public class PhoneManager : Singleton<PhoneManager>
     /// <returns></returns>
     public JsonData GetQQSession()
     {
-        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_QQREFRESHSESSION);
+        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_STRING_WXAUTORVAILD);
+        JsonData data = JsonMapper.ToObject(str);
+        return data;
+    }
+
+
+    /// <summary>
+    /// qq的票据是否有效
+    /// </summary>
+    /// <returns></returns>
+    public bool WXAnthorVaild()
+    {
+        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_STRING_QQAUTORVAILD);
+        return Convert.ToBoolean(str);
+    }
+
+    /// <summary>
+    /// 刷新获取qq票据
+    /// </summary>
+    /// <returns></returns>
+    public JsonData GetWXSession()
+    {
+        string str = PlatformManager.Instance.GetStringFromPlatform(UNITY_GET_STRING_WXREFRESHSESSION);
         JsonData data = JsonMapper.ToObject(str);
         return data;
     }
@@ -83,11 +106,43 @@ public class PhoneManager : Singleton<PhoneManager>
     /// </summary>
     public void AutoLogin()
     {
-        if (QQAnthorVaild())
+#if !UNITY_EDITOR
+        if (PlayerPrefs.HasKey("LoginPlat"))
         {
-            JsonData data = GetQQSession();
-            LoginCallBack(data, PlatType.QQ);
+            PlatType plat = (PlatType)Enum.Parse(typeof(PlatType), PlayerPrefs.GetString("LoginPlat"));
+            if (plat == PlatType.QQ)
+            {
+                if (QQAnthorVaild())
+                {
+                    JsonData data = GetQQSession();
+                    LoginCallBack(data, PlatType.QQ);
+                }
+            }
+            else if (plat == PlatType.WX)
+            {
+                if (WXAnthorVaild())
+                {
+                    JsonData data = GetWXSession();
+                    LoginCallBack(data, PlatType.WX);
+                }
+            }
+
         }
+        else
+        {
+            if (QQAnthorVaild())
+            {
+                JsonData data = GetQQSession();
+                LoginCallBack(data, PlatType.QQ);
+            }
+            else if(WXAnthorVaild())
+            {
+                JsonData data = GetWXSession();
+                LoginCallBack(data, PlatType.WX);
+            }
+        }
+#endif
+
     }
 
     /// <summary>
@@ -107,6 +162,8 @@ public class PhoneManager : Singleton<PhoneManager>
                 string token = (string)data["token"];
                 IsLogin = true;
                 CurPlatType = platType;
+                PlayerPrefs.SetString("LoginPlat", CurPlatType.ToString());
+                PlayerPrefs.Save();
                 if (LoginSuccess != null)
                 {
                     LoginSuccess(platType);

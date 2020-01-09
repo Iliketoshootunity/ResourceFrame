@@ -17,6 +17,8 @@ public class BuildApp
     {
         //打AssetBundle
         BundleEditor.BuildAB();
+        //写入版本数据
+        SaveVersion(PlayerSettings.bundleVersion, PlayerSettings.applicationIdentifier);
         //打包后的AssetBundle的路径
         string sourcePath = BundleEditor.BUILD_TARGET_PATH + "/";
         string targetPath = Application.streamingAssetsPath + "/";
@@ -38,8 +40,54 @@ public class BuildApp
         BuildPipeline.BuildPlayer(FindEnableLevel(), savePath, EditorUserBuildSettings.activeBuildTarget, BuildOptions.None);
         //打包之后删除
         DeleteStreamAssets();
+        AssetDatabase.Refresh();
     }
 
+    /// <summary>
+    /// 保存版本信息
+    /// </summary>
+    public static void SaveVersion(string verison, string package)
+    {
+        //只读第一行的数据，然后用现在的数据覆盖它
+        //因为其他行可能是其他的注释等等
+        string version = "Version:" + verison + " |Package:" + package;
+        string oneline = "";
+        string all = "";
+        string path = Application.dataPath + "/Resources/verison.txt";
+        using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+        {
+            using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.UTF8))
+            {
+                all = sr.ReadToEnd();
+                oneline = all.Split('\r')[0];
+            }
+
+        }
+        using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+        {
+            using (StreamWriter sr = new StreamWriter(fs, System.Text.Encoding.UTF8))
+            {
+                if (all == "")
+                {
+                    all = verison;
+                }
+                else
+                {
+                    all = all.Replace(oneline, version);
+                }
+                sr.Write(all);
+            }
+
+        }
+        AssetDatabase.Refresh();
+
+    }
+    [MenuItem("Build/TestSaveVersion")]
+
+    public static void TestSaveVersion()
+    {
+        SaveVersion(PlayerSettings.bundleVersion, PlayerSettings.applicationIdentifier);
+    }
     /// <summary>
     /// 复制
     /// </summary>
@@ -99,11 +147,11 @@ public class BuildApp
         string[] files = Directory.GetFileSystemEntries(Application.streamingAssetsPath + "/");
         for (int i = 0; i < files.Length; i++)
         {
-            if(Directory.Exists(files[i]))
+            if (Directory.Exists(files[i]))
             {
                 Directory.Delete(files[i]);
             }
-            else if(File.Exists(files[i]))
+            else if (File.Exists(files[i]))
             {
                 File.Delete(files[i]);
             }

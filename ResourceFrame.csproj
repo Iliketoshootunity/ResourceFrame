@@ -288,6 +288,7 @@
     <None Include="Assets\GameData\Shaders\Xray.shader" />
     <None Include="Assets\GameData\Shaders\benghuai.shader" />
     <None Include="Assets\Plugins\Android\AndroidManifest.xml" />
+    <None Include="Assets\Resources\verison.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
