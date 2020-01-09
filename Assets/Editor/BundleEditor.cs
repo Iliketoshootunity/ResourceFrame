@@ -176,7 +176,7 @@ public class BundleEditor
         AssetDatabase.Refresh();
         SetABName("assetbundleconfig", AB_CONFIG_BYTE_PATH);
 
-        if(!Directory.Exists(BUILD_TARGET_PATH))
+        if (!Directory.Exists(BUILD_TARGET_PATH))
         {
             Directory.CreateDirectory(BUILD_TARGET_PATH);
         }
@@ -258,7 +258,7 @@ public class BundleEditor
             if (Directory.Exists(m_AssetFiles[i]))
             {
                 //如果此路径在这个文件夹内
-                if(path.Contains(m_AssetFiles[i]))
+                if (path.Contains(m_AssetFiles[i]))
                 {
                     return true;
                 }
@@ -333,5 +333,39 @@ public class BundleEditor
         }
         return false;
     }
+
+    #region 热更信息相关
+
+    /// <summary>
+    /// 保存AssetBundleMd5信息
+    /// </summary>
+    public static void SaveABMd5()
+    {
+        //找到打包后Assetbundle的文件信息
+        ABMD5 abmds = new ABMD5();
+        abmds.ABMD5BaseList = new List<ABMD5Base>();
+        string[] files = Directory.GetFiles(BUILD_TARGET_PATH);
+        for (int i = 0; i < files.Length; i++)
+        {
+            //剔除不需要的文件
+            if (files[i].EndsWith(".meta") || files[i].EndsWith(""))
+            {
+                continue;
+            }
+            FileInfo file = new FileInfo(files[i]);
+            ABMD5Base ab = new ABMD5Base();
+            ab.Name = file.Name;
+            abmds.ABMD5BaseList.Add(ab);
+        }
+        //序列化成二进制文件
+        string path = Application.dataPath + "/Resources/ABMD5_Version" + PlayerSettings.bundleVersion;
+        FileStream fs1 = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+        fs1.Seek(0, SeekOrigin.Begin);
+        fs1.SetLength(0);
+        BinaryFormatter bf = new BinaryFormatter();
+        bf.Serialize(fs1, abmds);
+        fs1.Close();      
+    }
+    #endregion
 
 }
