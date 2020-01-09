@@ -10,7 +10,7 @@ public class ABMD5  {
     public List<ABMD5Base> ABMD5BaseList = new List<ABMD5Base>();
 
 }
-
+[System.Serializable]
 public class ABMD5Base
 {
     [XmlAttribute]
@@ -18,5 +18,5 @@ public class ABMD5Base
     [XmlAttribute]
     public string Md5 { get; set; }
     [XmlAttribute]
-    public long Size { get; set; }
+    public float Size { get; set; }
 }
