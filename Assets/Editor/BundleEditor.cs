@@ -5,6 +5,7 @@ using UnityEditor;
 using System.IO;
 using System.Xml.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 
 
 // 打包流程
@@ -20,7 +21,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class BundleEditor
 {
     public static string AB_CONFIG_BYTE_PATH = "Assets/GameData/Data/AssetBundleConfig.bytes";                                                  //AB包配置信息存储
-    public static string BUILD_TARGET_PATH = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();  //打包的路径
+    public static string BUILD_AB_TARGET_PATH = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();  //打包的路径
     public static string WRITE_VERSION_SAVE_PATH = Application.dataPath + "/../Version/" + EditorUserBuildSettings.activeBuildTarget.ToString(); //各个版本资源MD5路径
     public static string AB_PATH_CONFIG_PATH = "Assets/Editor/ABPathConfig.asset";                                                              //AB包配置信息
 
@@ -33,6 +34,9 @@ public class BundleEditor
     public static List<string> m_AssetFiles = new List<string>();
     //配置的AssetBundle路径列表
     public static List<string> m_ConfigFiles = new List<string>();
+
+
+    private static Dictionary<string, ABMD5Base> m_ABMD5BaseDir = new Dictionary<string, ABMD5Base>();
 
     [MenuItem("Tool/BuildAB")]
     public static void BuildAB()
@@ -181,13 +185,39 @@ public class BundleEditor
         AssetDatabase.Refresh();
         SetABName("assetbundleconfig", AB_CONFIG_BYTE_PATH);
 
-        if (!Directory.Exists(BUILD_TARGET_PATH))
+        if (!Directory.Exists(BUILD_AB_TARGET_PATH))
         {
-            Directory.CreateDirectory(BUILD_TARGET_PATH);
+            Directory.CreateDirectory(BUILD_AB_TARGET_PATH);
         }
 
         //打包
-        BuildPipeline.BuildAssetBundles(BUILD_TARGET_PATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+        AssetBundleManifest mainfest = BuildPipeline.BuildAssetBundles(BUILD_AB_TARGET_PATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+        if (mainfest == null)
+        {
+            Debug.LogError("打包失败");
+        }
+        else
+        {
+            Debug.Log("打包完成");
+        }
+
+        DeleteBuildPathMainfest();
+    }
+
+    /// <summary>
+    /// 删除Build路径的Mainfest
+    /// </summary>
+    public static void DeleteBuildPathMainfest()
+    {
+        DirectoryInfo dir = new DirectoryInfo(BUILD_AB_TARGET_PATH);
+        FileInfo[] files = dir.GetFiles("*", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            if (files[i].FullName.EndsWith(".mainfest"))
+            {
+                File.Delete(files[i].FullName);
+            }
+        }
     }
     /// <summary>
     /// 增量删除多余的AB包
@@ -196,7 +226,7 @@ public class BundleEditor
     {
         string[] allABName = AssetDatabase.GetAllAssetBundleNames();
         //获取旧的AB包文件信息
-        DirectoryInfo di = new DirectoryInfo(BUILD_TARGET_PATH);
+        DirectoryInfo di = new DirectoryInfo(BUILD_AB_TARGET_PATH);
         FileInfo[] files = di.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {
@@ -349,11 +379,11 @@ public class BundleEditor
         //找到打包后Assetbundle的文件信息
         ABMD5 abmds = new ABMD5();
         abmds.ABMD5BaseList = new List<ABMD5Base>();
-        string[] files = Directory.GetFiles(BUILD_TARGET_PATH);
+        string[] files = Directory.GetFiles(BUILD_AB_TARGET_PATH);
         for (int i = 0; i < files.Length; i++)
         {
             //剔除不需要的文件
-            if (files[i].EndsWith(".meta") || files[i].EndsWith(""))
+            if (files[i].EndsWith(".meta") || files[i].EndsWith(".manifest"))
             {
                 continue;
             }
@@ -393,9 +423,44 @@ public class BundleEditor
     /// <summary>
     /// 读取MD5
     /// </summary>
-    public static void ReadAbMD5()
+    public static void ReadAbMD5(string path)
     {
+        if (!File.Exists(path))
+        {
+            Debug.LogError("读取的Md5二进制文件不存在");
+            return;
+        }
+        //旧版本的资源
+        m_ABMD5BaseDir.Clear();
+        using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            ABMD5 md5 = (ABMD5)bf.Deserialize(fs);
+            for (int i = 0; i < md5.ABMD5BaseList.Count; i++)
+            {
+                m_ABMD5BaseDir.Add(md5.ABMD5BaseList[i].Name, md5.ABMD5BaseList[i]);
+            }
+        }
+        //将要更新的新版的资源
+        List<string> changeList = new List<string>();
+        string[] files = Directory.GetFiles(BUILD_AB_TARGET_PATH);
+        for (int i = 0; i < files.Length; i++)
+        {
+            //剔除不需要的文件
+            if (files[i].EndsWith(".meta") || files[i].EndsWith(".manifest"))
+            {
+                continue;
+            }
+            FileInfo fi = new FileInfo(files[i]);
+            if (!m_ABMD5BaseDir.ContainsKey(fi.Name))
+            {
+                changeList.Add(fi.Name);
+            }
+            else
+            {
 
+            }
+        }
     }
     #endregion
 

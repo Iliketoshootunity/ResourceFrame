@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 732721663
+CRC: 3601598880
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 824ae9920c6c7278c4b680bf17dfb147
+    Hash: 1b2d28d1e265998f8536295182834342
   TypeTreeHash:
     serializedVersion: 2
     Hash: 0b0e28da2dec19a6e0fe1dbd45769daf
@@ -53,4 +53,4 @@ Assets:
 - Assets/GameData/Modle/benghuai/Avatar_Kiana_C2_Texture_Body_Color_RGB2048.png
 - Assets/GameData/Modle/benghuai/ID_362.bmp
 Dependencies:
-- H:/UnityWorkSpace/ResourceFrame/Assets/../AssetBundle/Android/shaders
+- D:/MyWorkSpace/Unity/ResourceFrame/Assets/../AssetBundle/Android/shaders

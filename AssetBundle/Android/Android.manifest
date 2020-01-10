@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 709640157
+CRC: 1470068781
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -9,18 +9,21 @@ AssetBundleManifest:
       Name: sounds
       Dependencies: {}
     Info_2:
+      Name: texture
+      Dependencies: {}
+    Info_3:
       Name: attack
       Dependencies:
         Dependency_0: shaders
-    Info_3:
+    Info_4:
       Name: cube
       Dependencies: {}
-    Info_4:
+    Info_5:
       Name: loadingpanel
       Dependencies: {}
-    Info_5:
+    Info_6:
       Name: menupanel
       Dependencies: {}
-    Info_6:
+    Info_7:
       Name: assetbundleconfig
       Dependencies: {}
