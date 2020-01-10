@@ -12,11 +12,7 @@ MonoBehaviour:
   m_Name: ABPathConfig
   m_EditorClassIdentifier: 
   PrefabAssetDirectorys:
-  - Assets/GameData/Prefab
+  - Assets/GameData/Prefabs
   OtherAssetDirectorys:
-  - ABName: Shaders
+  - ABName: shader
     Path: Assets/GameData/Shaders
-  - ABName: Sounds
-    Path: Assets/GameData/Sounds
-  - ABName: Texture
-    Path: Assets/GameData/Texture

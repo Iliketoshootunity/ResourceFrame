@@ -314,6 +314,12 @@ public class ResourceManager : Singleton<ResourceManager>
     #endregion
 
     #region 加载
+    /// <summary>
+    /// 同步加载资源，针对ObjManager的方法
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="Obj"></param>
+    /// <returns></returns>
     public ResourceObj LoadResourceObj(string path, ResourceObj Obj)
     {
         if (string.IsNullOrEmpty(path)) return null;

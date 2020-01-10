@@ -20,7 +20,7 @@ public class BuildApp
         //写入版本数据
         SaveVersion(PlayerSettings.bundleVersion, PlayerSettings.applicationIdentifier);
         //打包后的AssetBundle的路径
-        string sourcePath = BundleEditor.BUILD_AB_TARGET_PATH + "/";
+        string sourcePath = BundleEditor.m_BuildABPath + "/";
         string targetPath = Application.streamingAssetsPath + "/";
         //将初始资源转到到StreamAsset路径下
         Copy(sourcePath, targetPath);

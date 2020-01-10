@@ -75,8 +75,9 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             return item;
         }
 
-        item.AssetBundle = LoadAssetBundle(item.ABName);
 
+
+        item.AssetBundle = LoadAssetBundle(item.ABName);
         if (item.AssetBundle != null)
         {
             //加载依赖项
@@ -89,6 +90,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
 
             }
         }
+
 
         return item;
 

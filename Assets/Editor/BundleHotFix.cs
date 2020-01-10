@@ -48,13 +48,13 @@ public class BundleHotFix : EditorWindow
         }
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
-        md5Path = EditorGUILayout.TextField("ABMD5文件路径", hotCount, GUILayout.Width(350), GUILayout.Height(20));
+        hotCount = EditorGUILayout.TextField("ABMD5文件路径", hotCount, GUILayout.Width(350), GUILayout.Height(20));
         GUILayout.EndHorizontal();
         if (GUILayout.Button("开始打热更包", GUILayout.Width(100), GUILayout.Height(20)))
         {
             if (!string.IsNullOrEmpty(md5Path) && md5Path.EndsWith("bytes"))
             {
-
+                BundleEditor.BuildAB(true, md5Path, hotCount);
             }
         }
 

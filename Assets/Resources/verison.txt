@@ -1,1 +1,1 @@
-﻿Version:0.1|Package:com.Company.ProductName
+﻿Version:0.1 |Package:com.Company.ProductName

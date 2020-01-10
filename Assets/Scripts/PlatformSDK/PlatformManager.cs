@@ -8,12 +8,16 @@ using UnityEngine;
 public class PlatformManager : Singleton<PlatformManager>
 {
     private GameObject m_PlatformObj;
+ #if UNITY_ANDROID
     private PlatformScript m_PlatformScript;
+#endif
     void Init()
     {
         m_PlatformObj = new GameObject("PlatformObj");
         m_PlatformObj.hideFlags = HideFlags.HideAndDontSave;
+#if UNITY_ANDROID
         m_PlatformScript = m_PlatformObj.AddComponent<PlatformScript>();
+#endif
         if (!Application.isPlaying) return;
         GameObject.DontDestroyOnLoad(m_PlatformObj);
 #if UNITY_ANDROID && !UNITY_EDITOR

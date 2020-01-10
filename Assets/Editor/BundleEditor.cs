@@ -20,10 +20,13 @@ using System.Text;
 
 public class BundleEditor
 {
-    public static string AB_CONFIG_BYTE_PATH = "Assets/GameData/Data/AssetBundleConfig.bytes";                                                  //AB包配置信息存储
-    public static string BUILD_AB_TARGET_PATH = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();  //打包的路径
-    public static string WRITE_VERSION_SAVE_PATH = Application.dataPath + "/../Version/" + EditorUserBuildSettings.activeBuildTarget.ToString(); //各个版本资源MD5路径
-    public static string AB_PATH_CONFIG_PATH = "Assets/Editor/ABPathConfig.asset";                                                              //AB包配置信息
+    public static string m_ABConfigPath = "Assets/Editor/ABPathConfig.asset";                                                              //AB包配置信息
+    public static string m_ABConfigBytePath = "Assets/GameData/Data/AssetBundleConfig.bytes";                                                  //AB包配置信息存储
+
+    public static string m_BuildABPath = Application.dataPath + "/../AssetBundle/" + EditorUserBuildSettings.activeBuildTarget.ToString();  //打包的路径
+
+    public static string m_ABMD5VersionPath = Application.dataPath + "/../Version/" + EditorUserBuildSettings.activeBuildTarget.ToString(); //各个版本资源MD5路径
+    public static string m_ABHotFixPath = Application.dataPath + "/../HotFix/" + EditorUserBuildSettings.activeBuildTarget.ToString();      //热更资源的制定路径
 
     //pregfab AssetBundle 列表
     public static Dictionary<string, List<string>> m_PrefabABFiles = new Dictionary<string, List<string>>();
@@ -39,13 +42,17 @@ public class BundleEditor
     private static Dictionary<string, ABMD5Base> m_ABMD5BaseDir = new Dictionary<string, ABMD5Base>();
 
     [MenuItem("Tool/BuildAB")]
-    public static void BuildAB()
+    public static void BuildNormal()
+    {
+        BuildAB();
+    }
+    public static void BuildAB(bool isHotFix = false, string md5Path = "", string hotCount = "")
     {
         m_OtherABFiles.Clear();
         m_AssetFiles.Clear();
         m_PrefabABFiles.Clear();
         m_ConfigFiles.Clear();
-        ABPathConfig config = AssetDatabase.LoadAssetAtPath<ABPathConfig>(AB_PATH_CONFIG_PATH);
+        ABPathConfig config = AssetDatabase.LoadAssetAtPath<ABPathConfig>(m_ABConfigPath);
         if (config == null)
         {
             return;
@@ -68,7 +75,10 @@ public class BundleEditor
 
         //Prefab资源的AssetBundle
         //查找这个路径下的所有的prefab路径的GUID
-        string[] guidArray = AssetDatabase.FindAssets("t:Prefab", config.PrefabAssetDirectorys.ToArray());
+        string[] prefabFileArr = config.PrefabAssetDirectorys.ToArray();
+        string[] guidArray = AssetDatabase.FindAssets("t:Prefab", prefabFileArr);
+
+       // string[] allStr = AssetDatabase.FindAssets("t:Prefab", config.PrefabAssetDirectorys.ToArray());
         for (int i = 0; i < guidArray.Length; i++)
         {
             //根据GUID获取路径
@@ -115,7 +125,15 @@ public class BundleEditor
 
         BuildAssetBundle();
 
-        WriteABMd5();
+        //if (isHotFix)
+        //{
+        //    ReadABMD5(md5Path, hotCount);
+        //}
+        //else
+        //{
+        //    WriteABMd5();
+        //}
+
 
         //清除AB包名,这是因为在设置是更改AB包名，会造成资源的meta文件修改，不利于上传
         //把一个已经标记Bundle Name 资源移动到文件夹中的时候，下次打包会出错
@@ -175,7 +193,7 @@ public class BundleEditor
 
 
         //序列化成二进制文件
-        FileStream fs1 = new FileStream(AB_CONFIG_BYTE_PATH, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+        FileStream fs1 = new FileStream(m_ABConfigBytePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
         fs1.Seek(0, SeekOrigin.Begin);
         fs1.SetLength(0);
         BinaryFormatter bf = new BinaryFormatter();
@@ -183,15 +201,15 @@ public class BundleEditor
         fs1.Close();
         //刷新上一步后的资源目录
         AssetDatabase.Refresh();
-        SetABName("assetbundleconfig", AB_CONFIG_BYTE_PATH);
+        SetABName("assetbundleconfig", m_ABConfigBytePath);
 
-        if (!Directory.Exists(BUILD_AB_TARGET_PATH))
+        if (!Directory.Exists(m_BuildABPath))
         {
-            Directory.CreateDirectory(BUILD_AB_TARGET_PATH);
+            Directory.CreateDirectory(m_BuildABPath);
         }
 
         //打包
-        AssetBundleManifest mainfest = BuildPipeline.BuildAssetBundles(BUILD_AB_TARGET_PATH, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+        AssetBundleManifest mainfest = BuildPipeline.BuildAssetBundles(m_BuildABPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
         if (mainfest == null)
         {
             Debug.LogError("打包失败");
@@ -201,7 +219,7 @@ public class BundleEditor
             Debug.Log("打包完成");
         }
 
-        DeleteBuildPathMainfest();
+        //DeleteBuildPathMainfest();
     }
 
     /// <summary>
@@ -209,7 +227,7 @@ public class BundleEditor
     /// </summary>
     public static void DeleteBuildPathMainfest()
     {
-        DirectoryInfo dir = new DirectoryInfo(BUILD_AB_TARGET_PATH);
+        DirectoryInfo dir = new DirectoryInfo(m_BuildABPath);
         FileInfo[] files = dir.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {
@@ -226,7 +244,7 @@ public class BundleEditor
     {
         string[] allABName = AssetDatabase.GetAllAssetBundleNames();
         //获取旧的AB包文件信息
-        DirectoryInfo di = new DirectoryInfo(BUILD_AB_TARGET_PATH);
+        DirectoryInfo di = new DirectoryInfo(m_BuildABPath);
         FileInfo[] files = di.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {
@@ -379,7 +397,7 @@ public class BundleEditor
         //找到打包后Assetbundle的文件信息
         ABMD5 abmds = new ABMD5();
         abmds.ABMD5BaseList = new List<ABMD5Base>();
-        string[] files = Directory.GetFiles(BUILD_AB_TARGET_PATH);
+        string[] files = Directory.GetFiles(m_BuildABPath);
         for (int i = 0; i < files.Length; i++)
         {
             //剔除不需要的文件
@@ -408,11 +426,11 @@ public class BundleEditor
         bf.Serialize(fs1, abmds);
         fs1.Close();
         //将写好的版本数据Copy到外不存储
-        if (!Directory.Exists(WRITE_VERSION_SAVE_PATH))
+        if (!Directory.Exists(m_ABMD5VersionPath))
         {
-            Directory.CreateDirectory(WRITE_VERSION_SAVE_PATH);
+            Directory.CreateDirectory(m_ABMD5VersionPath);
         }
-        string targetFile = WRITE_VERSION_SAVE_PATH + "/ABMD5" + PlayerSettings.bundleVersion + ".bytes";
+        string targetFile = m_ABMD5VersionPath + "/ABMD5" + PlayerSettings.bundleVersion + ".bytes";
         if (File.Exists(targetFile))
         {
             File.Delete(targetFile);
@@ -423,7 +441,7 @@ public class BundleEditor
     /// <summary>
     /// 读取MD5
     /// </summary>
-    public static void ReadAbMD5(string path)
+    public static void ReadABMD5(string path, string hotCount)
     {
         if (!File.Exists(path))
         {
@@ -441,9 +459,9 @@ public class BundleEditor
                 m_ABMD5BaseDir.Add(md5.ABMD5BaseList[i].Name, md5.ABMD5BaseList[i]);
             }
         }
-        //将要更新的新版的资源
+        //筛选更新的新版的资源
         List<string> changeList = new List<string>();
-        string[] files = Directory.GetFiles(BUILD_AB_TARGET_PATH);
+        string[] files = Directory.GetFiles(m_BuildABPath);
         for (int i = 0; i < files.Length; i++)
         {
             //剔除不需要的文件
@@ -458,10 +476,36 @@ public class BundleEditor
             }
             else
             {
-
+                ABMD5Base md5base = null;
+                if (m_ABMD5BaseDir.TryGetValue(fi.Name, out md5base))
+                {
+                    string md5 = MD5Manager.Instance.BuildFileMd5(fi.FullName);
+                    if (md5base.Md5 != md5)
+                    {
+                        changeList.Add(fi.Name);
+                    }
+                }
             }
         }
+        //复制到制定的文件家，并序列化成XML
+        CopyHotAssetAndCreateXml(changeList, hotCount);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="changList"></param>
+    /// <param name="hotCount"></param>
+    public static void CopyHotAssetAndCreateXml(List<string> changList, string hotCount)
+    {
+        if (!Directory.Exists(m_ABHotFixPath))
+        {
+            Directory.CreateDirectory(m_ABHotFixPath);
+        }
+        DirectoryInfo di = new DirectoryInfo(m_BuildABPath);
+    }
+
+
     #endregion
 
 }

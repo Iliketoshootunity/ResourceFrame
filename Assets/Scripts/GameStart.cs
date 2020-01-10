@@ -27,9 +27,9 @@ public class GameStart : MonoBehaviour
         UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
         UIManager.Instance.RegisterWindow<LoadingWindow>(ConStr.LOADINGPANEL);
         UIManager.Instance.RegisterWindow<MenuWindow>(ConStr.MENUPANEL);
-        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefab/Cube.prefab");
-
-        GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
+        //ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Cube.prefab");
+        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Attack.prefab");
+        //GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
     }
 
 
