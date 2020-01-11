@@ -70,13 +70,6 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             return null;
         }
 
-        if (item.AssetBundle != null)
-        {
-            return item;
-        }
-
-
-
         item.AssetBundle = LoadAssetBundle(item.ABName);
         if (item.AssetBundle != null)
         {
@@ -90,7 +83,6 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
 
             }
         }
-
 
         return item;
 

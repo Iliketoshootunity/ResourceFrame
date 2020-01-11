@@ -155,21 +155,16 @@ Prefab:
     - target: {fileID: 224049497424528266, guid: 627a5a8c41b49e44980bbdaf631cffc4,
         type: 2}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4881494454571022, guid: 627a5a8c41b49e44980bbdaf631cffc4, type: 2}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 224878785976756854, guid: 627a5a8c41b49e44980bbdaf631cffc4,
         type: 2}
       propertyPath: m_RootOrder
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114849280847294876, guid: 627a5a8c41b49e44980bbdaf631cffc4,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 81928102977003316, guid: 627a5a8c41b49e44980bbdaf631cffc4, type: 2}

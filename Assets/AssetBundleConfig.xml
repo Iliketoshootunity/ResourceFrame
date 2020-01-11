@@ -3,10 +3,6 @@
   <ABList AssetName="Attack.prefab" ABName="attack" Crc="192126642" path="Assets/GameData/Prefabs/Attack.prefab">
     <Depends>shader</Depends>
   </ABList>
-  <ABList AssetName="Cube.prefab" ABName="cube" Crc="22418538" path="Assets/GameData/Prefabs/Cube.prefab">
-    <Depends>shader</Depends>
-    <Depends>attack</Depends>
-  </ABList>
   <ABList AssetName="LoadingPanel.prefab" ABName="loadingpanel" Crc="968375833" path="Assets/GameData/Prefabs/UGUI/Panel/LoadingPanel.prefab" />
   <ABList AssetName="MenuPanel.prefab" ABName="menupanel" Crc="2681775694" path="Assets/GameData/Prefabs/UGUI/Panel/MenuPanel.prefab" />
   <ABList AssetName="ParticleTest1.prefab" ABName="particletest1" Crc="2774616854" path="Assets/GameData/Prefabs/Effect/ParticleTest1.prefab" />

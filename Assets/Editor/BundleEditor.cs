@@ -125,14 +125,14 @@ public class BundleEditor
 
         BuildAssetBundle();
 
-        //if (isHotFix)
-        //{
-        //    ReadABMD5(md5Path, hotCount);
-        //}
-        //else
-        //{
-        //    WriteABMd5();
-        //}
+        if (isHotFix)
+        {
+            ReadABMD5(md5Path, hotCount);
+        }
+        else
+        {
+            WriteABMd5();
+        }
 
 
         //清除AB包名,这是因为在设置是更改AB包名，会造成资源的meta文件修改，不利于上传
@@ -219,7 +219,7 @@ public class BundleEditor
             Debug.Log("打包完成");
         }
 
-        //DeleteBuildPathMainfest();
+        DeleteBuildPathMainfest();
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ public class BundleEditor
         FileInfo[] files = dir.GetFiles("*", SearchOption.AllDirectories);
         for (int i = 0; i < files.Length; i++)
         {
-            if (files[i].FullName.EndsWith(".mainfest"))
+            if (files[i].FullName.EndsWith(".manifest"))
             {
                 File.Delete(files[i].FullName);
             }
@@ -448,7 +448,7 @@ public class BundleEditor
             Debug.LogError("读取的Md5二进制文件不存在");
             return;
         }
-        //旧版本的资源
+        //旧版本的资源信息
         m_ABMD5BaseDir.Clear();
         using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite))
         {
@@ -502,10 +502,23 @@ public class BundleEditor
         {
             Directory.CreateDirectory(m_ABHotFixPath);
         }
-        DirectoryInfo di = new DirectoryInfo(m_BuildABPath);
+        foreach (string str in changList)
+        {
+            if (!str.EndsWith(".manifest"))
+            {
+                File.Copy(m_BuildABPath + "/" + str, m_ABHotFixPath + "/" + str);
+            }
+        }
+
     }
-
-
     #endregion
 
+    /// <summary>
+    /// 删除指定文件夹的所有文件
+    /// </summary>
+    /// <param name="path"></param>
+    public static void DeleteAllFiles(string path)
+    {
+
+    }
 }
