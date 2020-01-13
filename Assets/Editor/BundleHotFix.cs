@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 /// <summary>
 /// 版本资源热更窗口
-/// 打包当前版本与指定的历史版本对比，筛选出需要更新的资源
+/// 与打包时的版本对比，筛选出需要更新的资源
 /// 保存在指定文件夹内
 /// </summary>
 public class BundleHotFix : EditorWindow

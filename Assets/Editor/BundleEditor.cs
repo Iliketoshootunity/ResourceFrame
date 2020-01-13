@@ -78,7 +78,7 @@ public class BundleEditor
         string[] prefabFileArr = config.PrefabAssetDirectorys.ToArray();
         string[] guidArray = AssetDatabase.FindAssets("t:Prefab", prefabFileArr);
 
-       // string[] allStr = AssetDatabase.FindAssets("t:Prefab", config.PrefabAssetDirectorys.ToArray());
+        // string[] allStr = AssetDatabase.FindAssets("t:Prefab", config.PrefabAssetDirectorys.ToArray());
         for (int i = 0; i < guidArray.Length; i++)
         {
             //根据GUID获取路径
@@ -492,7 +492,7 @@ public class BundleEditor
     }
 
     /// <summary>
-    /// 
+    /// 拷贝筛选的AB包以及服务器配置表
     /// </summary>
     /// <param name="changList"></param>
     /// <param name="hotCount"></param>
@@ -502,6 +502,7 @@ public class BundleEditor
         {
             Directory.CreateDirectory(m_ABHotFixPath);
         }
+        DeleteAllFiles(m_ABHotFixPath);
         foreach (string str in changList)
         {
             if (!str.EndsWith(".manifest"))
@@ -509,7 +510,36 @@ public class BundleEditor
                 File.Copy(m_BuildABPath + "/" + str, m_ABHotFixPath + "/" + str);
             }
         }
-
+        //生成这个热更资源包的XML
+        DirectoryInfo di = new DirectoryInfo(m_ABHotFixPath);
+        FileInfo[] fis = di.GetFiles("*", SearchOption.AllDirectories);
+        Patchs patcs = new Patchs();
+        patcs.Version = 1; //自己更改
+        patcs.Des = "测试打包";
+        patcs.Files = new List<Patch>();
+        for (int i = 0; i < fis.Length; i++)
+        {
+            if (changList.Contains(fis[i].Name))
+            {
+                Patch patch = new Patch();
+                patch.Name = fis[i].Name;
+                patch.MD5 = MD5Manager.Instance.BuildFileMd5(fis[i].FullName);
+                patch.Platform = EditorUserBuildSettings.activeBuildTarget.ToString();
+                patch.URL = "http://127.0.0.1:80/AssetBundle/" + PlayerSettings.bundleVersion + "/" + hotCount + "/" + fis[i].Name;
+                patch.Size = fis[i].Length / 1024.0f;
+                patcs.Files.Add(patch);
+            }
+        }
+        //序列化成XML
+        string xmlPath = m_ABHotFixPath + "/HotPatchs.xml";
+        using (FileStream stream = new FileStream(xmlPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+        {
+            using (StreamWriter sw = new StreamWriter(stream, System.Text.Encoding.UTF8))
+            {
+                XmlSerializer x = new XmlSerializer(patcs.GetType());
+                x.Serialize(sw, patcs);
+            }
+        }
     }
     #endregion
 
@@ -519,6 +549,11 @@ public class BundleEditor
     /// <param name="path"></param>
     public static void DeleteAllFiles(string path)
     {
-
+        DirectoryInfo di = new DirectoryInfo(path);
+        FileInfo[] fs = di.GetFiles("*", SearchOption.AllDirectories);
+        for (int i = 0; i < fs.Length; i++)
+        {
+            File.Delete(fs[i].FullName);
+        }
     }
 }

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Patchs xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="1" Des="测试打包">
+  <Files MD5="8fded31fab866d62e049c979fa5cfc39" Name="attack" Size="683.019531" Platform="StandaloneWindows64" URL="http://127.0.0.1:80/AssetBundle/0.1/1/attack" />
+  <Files MD5="5ff5522072d01e8cf68758f181501453" Name="StandaloneWindows64" Size="1.74707031" Platform="StandaloneWindows64" URL="http://127.0.0.1:80/AssetBundle/0.1/1/StandaloneWindows64" />
+</Patchs>

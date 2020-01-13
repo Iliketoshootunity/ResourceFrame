@@ -50,7 +50,7 @@ public class BuildApp
     {
         //只读第一行的数据，然后用现在的数据覆盖它
         //因为其他行可能是其他的注释等等
-        string version = "Version:" + verison + " |Package:" + package;
+        string version = "Version:" + verison + "|Package:" + package;
         string oneline = "";
         string all = "";
         string path = Application.dataPath + "/Resources/verison.txt";
