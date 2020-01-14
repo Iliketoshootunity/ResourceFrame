@@ -71,7 +71,7 @@ public abstract class DownloadItem
         }
     }
     /// <summary>
-    /// 保存的文件路径
+    /// 保存的文件路径(全路径)
     /// </summary>
     protected string m_SaveFile;
 
@@ -96,7 +96,7 @@ public abstract class DownloadItem
         }
     }
 
-    public  DownloadItem(string url, string savePath)
+    public DownloadItem(string url, string savePath)
     {
         m_Url = url;
         m_SavePath = savePath;
@@ -107,7 +107,7 @@ public abstract class DownloadItem
         m_StartLoad = false;
     }
 
-    public virtual IEnumerator Download(Action callBack)
+    public virtual IEnumerator Download(Action callBack = null)
     {
         yield return null;
     }

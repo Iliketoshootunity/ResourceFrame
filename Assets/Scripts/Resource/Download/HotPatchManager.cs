@@ -60,12 +60,38 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// 需要下载的热更包
     /// </summary>
     private Dictionary<string, Patch> m_DownLoadPatchDic = new Dictionary<string, Patch>();
-
+    /// <summary>
+    /// 需要下载的热更包 名字和MD5映射
+    /// </summary>
+    private Dictionary<string, string> m_DownloadMD5Dic = new Dictionary<string, string>();
     /// <summary>
     /// 从服务器下载下来的资源的路径
     /// </summary>
     private string m_DownloadPath = Application.persistentDataPath + "/Download";
-
+    /// <summary>
+    /// 已经下载完的热更包
+    /// </summary>
+    private List<Patch> m_AlreadyDownload = new List<Patch>();
+    /// <summary>
+    /// 是否已经开始下载
+    /// </summary>
+    private bool m_StartDownload;
+    /// <summary>
+    /// 读取服务器信息错误回调
+    /// </summary>
+    public Action ReadServerInfoError;
+    /// <summary>
+    /// 下载资源出错
+    /// </summary>
+    public Action<string> DownloadItemError;
+    /// <summary>
+    /// 因为出错重新下载的次数
+    /// </summary>
+    private int m_RestartDownloadCount = 0;
+    /// <summary>
+    /// 因为出错重新下载的最大次数
+    /// </summary>
+    private const int RestartDownloadMaxNumber = 4;
     /// <summary>
     /// 需要下载的个数
     /// </summary>
@@ -95,11 +121,9 @@ public class HotPatchManager : Singleton<HotPatchManager>
         {
             if (m_ServerInfo == null)
             {
-                //临时处理
-                if (hotCallBack != null)
+                if (ReadServerInfoError != null)
                 {
-                    hotCallBack(false);
-                    return;
+                    ReadServerInfoError();
                 }
             }
             foreach (var item in m_ServerInfo.VersionInfo)
@@ -122,7 +146,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
             {
                 ComputeDownLoadHotAB();
                 //更新本地文件
-                if(File.Exists(m_LocalXMLPath))
+                if (File.Exists(m_LocalXMLPath))
                 {
                     File.Delete(m_LocalXMLPath);
                 }
@@ -283,6 +307,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     {
         m_DownLoadPatchList.Clear();
         m_DownLoadPatchDic.Clear();
+        m_DownloadMD5Dic.Clear();
         foreach (var item in m_CurGamePatch.Files)
         {
             if ((Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer) && item.Platform == "StandaloneWindows64")
@@ -313,6 +338,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
             //没有说明需要下载
             m_DownLoadPatchList.Add(patch);
             m_DownLoadPatchDic.Add(patch.Name, patch);
+            m_DownloadMD5Dic.Add(patch.Name, patch.MD5);
         }
         else
         {
@@ -322,18 +348,138 @@ public class HotPatchManager : Singleton<HotPatchManager>
             {
                 m_DownLoadPatchList.Add(patch);
                 m_DownLoadPatchDic.Add(patch.Name, patch);
+                m_DownloadMD5Dic.Add(patch.Name, patch.MD5);
             }
         }
 
     }
 
+    /// <summary>
+    /// 开始下载
+    /// </summary>
+    /// <param name="callBack"></param>
+    /// <returns></returns>
+    private IEnumerator StartDownload(Action callBack, List<Patch> downloadPatchList = null)
+    {
+        if (!Directory.Exists(m_DownloadPath))
+        {
+            Directory.CreateDirectory(m_DownloadPath);
+        }
+        m_AlreadyDownload.Clear();
+        m_StartDownload = false;
+        if (downloadPatchList != null)
+        {
+            m_DownLoadPatchList = downloadPatchList;
+        }
+        List<DownloadAssetBundle> downloadAssts = new List<DownloadAssetBundle>();
+        foreach (var item in m_DownLoadPatchList)
+        {
+            DownloadAssetBundle d = new DownloadAssetBundle(item.URL, m_DownloadPath);
+            downloadAssts.Add(d);
+        }
+        foreach (var item in downloadAssts)
+        {
+            yield return m_Mono.StartCoroutine(item.Download());
+            item.Destory();
+            Patch patch = null;
+            if (m_DownLoadPatchDic.TryGetValue(item.FileName, out patch))
+            {
+                m_AlreadyDownload.Add(patch);
+            }
+        }
+
+        //检查下载文件的MD5
+        CheckDownloadMD5(downloadAssts, callBack);
+    }
+
+    /// <summary>
+    /// 对已经下载完的包进行MD5校验，查看是否资源和XML表的数据是否一致
+    /// 如果不一致，重新下载，重新下载有次数限制
+    /// </summary>
+    /// <param name="downloadAssts"></param>
+    /// <param name="callBack"></param>
+    private void CheckDownloadMD5(List<DownloadAssetBundle> downloadAssts, Action callBack)
+    {
+        List<Patch> m_DownloadList = new List<Patch>();
+        for (int i = 0; i < downloadAssts.Count; i++)
+        {
+            string xmlMd5 = "";
+            if (m_DownloadMD5Dic.TryGetValue(downloadAssts[i].FileName, out xmlMd5))
+            {
+                string downloadMd5 = MD5Manager.Instance.BuildFileMd5(downloadAssts[i].SaveFile);
+                //检查下载下来的包的MD5和XML的MD5的数据并不一致，则需要重新下载
+                if (downloadMd5 != xmlMd5)
+                {
+                    Patch patch = FindPatchByName(downloadAssts[i].FileName);
+                    m_DownloadList.Add(patch);
+                }
+            }
+            else
+            {
+                Debug.LogError(string.Format("{0}未在下载的字段中找到", downloadAssts[i].FileName));
+            }
+        }
+        if (m_DownloadList.Count < 0)
+        {
+            //下载的文件无误
+            if (callBack != null)
+            {
+                callBack();
+            }
+            m_StartDownload = false;
+        }
+        else
+        {
+            if (m_RestartDownloadCount >= RestartDownloadMaxNumber)
+            {
+                m_DownloadMD5Dic.Clear();
+                string allName = "";
+                for (int i = 0; i < m_DownloadList.Count; i++)
+                {
+                    allName += m_DownloadList[i].Name + ";";
+                }
+                if (DownloadItemError != null)
+                {
+                    DownloadItemError(allName);
+                }
+                m_StartDownload = false;
+            }
+            else
+            {
+                m_DownloadMD5Dic.Clear();
+                for (int i = 0; i < m_DownloadList.Count; i++)
+                {
+                    m_DownloadMD5Dic.Add(m_DownloadList[i].Name, m_DownloadList[i].MD5);
+                }
+                m_RestartDownloadCount++;
+                //重新下载出错的资源
+                m_Mono.StartCoroutine(StartDownload(callBack, m_DownloadList));
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// 根据名字查找Patch
+    /// </summary>
+    /// <param name="patchName"></param>
+    /// <returns></returns>
+    private Patch FindPatchByName(string patchName)
+    {
+        Patch patch = null;
+        if (m_DownLoadPatchDic.TryGetValue(patchName, out patch))
+        {
+            return patch;
+        }
+        return patch;
+    }
 
 }
 
 
 public class FileTool
 {
-    public static void CreateFile(string filePath,byte[] dataBuffer)
+    public static void CreateFile(string filePath, byte[] dataBuffer)
     {
         if (File.Exists(filePath))
         {

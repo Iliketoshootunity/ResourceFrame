@@ -12,7 +12,7 @@ public class DownloadAssetBundle : DownloadItem
 
     }
 
-    public override IEnumerator Download(Action callBack)
+    public override IEnumerator Download(Action callBack = null)
     {
         m_WebRequest = new UnityWebRequest(m_Url);
         m_WebRequest.timeout = 30;
