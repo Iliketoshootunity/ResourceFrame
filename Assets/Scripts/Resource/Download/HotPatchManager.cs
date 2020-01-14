@@ -73,6 +73,10 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// </summary>
     private List<Patch> m_AlreadyDownload = new List<Patch>();
     /// <summary>
+    /// 正在下载的AB包
+    /// </summary>
+    private DownloadItem m_DownloadingAB;
+    /// <summary>
     /// 是否已经开始下载
     /// </summary>
     private bool m_StartDownload;
@@ -98,7 +102,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     private int m_DownloadCount;
 
     /// <summary>
-    /// 需要下载的数据大小
+    /// 需要下载的数据大小 KB
     /// </summary>
     private float m_DownloadSize;
     /// <summary>
@@ -126,6 +130,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
                     ReadServerInfoError();
                 }
             }
+            //获取本地版本信息
             foreach (var item in m_ServerInfo.VersionInfo)
             {
                 if (item.Version == m_CurVersion)
@@ -155,6 +160,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
             }
             else
             {
+                //防止文件损坏的情况
                 ComputeDownLoadHotAB();
             }
 
@@ -379,6 +385,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
         }
         foreach (var item in downloadAssts)
         {
+            m_DownloadingAB = item;
             yield return m_Mono.StartCoroutine(item.Download());
             item.Destory();
             Patch patch = null;
@@ -459,6 +466,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
         }
     }
 
+
     /// <summary>
     /// 根据名字查找Patch
     /// </summary>
@@ -472,6 +480,56 @@ public class HotPatchManager : Singleton<HotPatchManager>
             return patch;
         }
         return patch;
+    }
+
+    /// <summary>
+    /// 获取已经下载的资源
+    /// </summary>
+    /// <returns></returns>
+    public float GetAlreadyDownloadSize()
+    {
+        float size = 0;
+        for (int i = 0; i < m_AlreadyDownload.Count; i++)
+        {
+            size += m_AlreadyDownload[i].Size;
+        }
+        if (m_DownloadingAB != null)
+        {
+            Patch patch = null;
+            if (m_DownLoadPatchDic.TryGetValue(m_DownloadingAB.FileName, out patch))
+            {
+                if (!m_AlreadyDownload.Contains(patch))
+                {
+                    size += m_DownloadingAB.GetCurLength();
+                }
+            }
+        }
+        return size;
+
+    }
+
+    /// <summary>
+    /// 获取已经下载的进度
+    /// </summary>
+    /// <returns></returns>
+    public float GetAlreadyDownloadProgress()
+    {
+        return GetAlreadyDownloadSize() / m_DownloadSize;
+    }
+
+    /// <summary>
+    /// 获取在Download目录下的Ab包的路径
+    /// </summary>
+    /// <param name="abName"></param>
+    /// <returns></returns>
+    public string ComputeABPath(string abName)
+    {
+        Patch patch = null;
+        if (m_HotPatchDic.TryGetValue(abName, out patch) && patch != null)
+        {
+            return m_DownloadPath + "/" + abName;
+        }
+        return "";
     }
 
 }

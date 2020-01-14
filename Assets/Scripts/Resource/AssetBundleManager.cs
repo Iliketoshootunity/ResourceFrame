@@ -35,6 +35,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
         MemoryStream ms = new MemoryStream(textAsset.bytes);
         BinaryFormatter bf = new BinaryFormatter();
         config = (AssetBundleConfig)bf.Deserialize(ms);
+        ms.Close();
         if (config == null)
         {
             Debug.LogError("AssetBundleConfig 反序列化失败 ");
@@ -133,7 +134,9 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
         if (!m_AssetBundleItemDic.TryGetValue(crc, out item))
         {
             item = m_AssetBundleItemPool.Spawn(true);
-            item.AssetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/" + abName);                     //测试路径
+            string hotABPath = HotPatchManager.Instance.ComputeABPath(abName);
+            string fullName = string.IsNullOrEmpty(hotABPath) ? Application.streamingAssetsPath + "/" + abName : hotABPath;
+            item.AssetBundle = AssetBundle.LoadFromFile(fullName);    
             if (item.AssetBundle == null)
             {
                 Debug.LogError("未能正确加载AssetBundle,请检查！！！！！");
