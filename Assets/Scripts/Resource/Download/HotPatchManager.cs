@@ -105,6 +105,31 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// 需要下载的数据大小 KB
     /// </summary>
     private float m_DownloadSize;
+
+    public string CurVersion
+    {
+        get
+        {
+            return m_CurVersion;
+        }
+    }
+
+    public string CurPackage
+    {
+        get
+        {
+            return m_CurPackage;
+        }
+    }
+
+    public float DownloadSize
+    {
+        get
+        {
+            return m_DownloadSize;
+        }
+    }
+
     /// <summary>
     /// 初始化
     /// </summary>
@@ -133,7 +158,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
             //获取本地版本信息
             foreach (var item in m_ServerInfo.VersionInfo)
             {
-                if (item.Version == m_CurVersion)
+                if (item.Version == CurVersion)
                 {
                     m_GameVersion = item;
                     break;
@@ -259,7 +284,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
                     VersionInfo localVersion = null;
                     foreach (var item in m_LocalInfo.VersionInfo)
                     {
-                        if (item.Version == m_CurVersion)
+                        if (item.Version == CurVersion)
                         {
                             localVersion = item;
                         }
@@ -365,7 +390,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// </summary>
     /// <param name="callBack"></param>
     /// <returns></returns>
-    private IEnumerator StartDownload(Action callBack, List<Patch> downloadPatchList = null)
+    public IEnumerator StartDownload(Action callBack, List<Patch> downloadPatchList = null)
     {
         if (!Directory.Exists(m_DownloadPath))
         {
@@ -514,7 +539,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// <returns></returns>
     public float GetAlreadyDownloadProgress()
     {
-        return GetAlreadyDownloadSize() / m_DownloadSize;
+        return GetAlreadyDownloadSize() / DownloadSize;
     }
 
     /// <summary>

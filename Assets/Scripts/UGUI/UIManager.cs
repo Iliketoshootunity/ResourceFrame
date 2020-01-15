@@ -22,6 +22,17 @@ public class UIManager : Singleton<UIManager>
     private Dictionary<string, Window> m_WindowDic = new Dictionary<string, Window>();
     private List<Window> m_WindowList = new List<Window>();
 
+    public RectTransform UIRoot
+    {
+        get
+        {
+            return m_UIRoot;
+        }
+        
+    }
+
+
+
     /// <summary>
     /// 初始化
     /// </summary>
@@ -82,9 +93,9 @@ public class UIManager : Singleton<UIManager>
     /// <param name="active"></param>
     public void ShowOrHideAllUI(bool active)
     {
-        if (m_UIRoot != null)
+        if (UIRoot != null)
         {
-            m_UIRoot.gameObject.SetActive(active);
+            UIRoot.gameObject.SetActive(active);
         }
     }
 
