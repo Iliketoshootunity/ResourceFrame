@@ -20,7 +20,21 @@ public class XMLMono : MonoBehaviour
         //    Debug.Log(tt.List[i]);
         //}
 
-        TestLoadAssetBundle();
+        using (FileStream stream = new FileStream(Application.dataPath + "/ServerInfo.xml", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+        {
+            using (StreamWriter sw = new StreamWriter(stream, System.Text.Encoding.UTF8))
+            {
+                ServerInfo Info = new ServerInfo();
+                Info.VersionInfo = new VersionInfo[1];
+                Info.VersionInfo[0] = new VersionInfo();
+                Info.VersionInfo[0].Version = "0.1";
+                XmlSerializer x = new XmlSerializer(Info.GetType());
+                x.Serialize(sw, Info);
+            }
+        }
+
+
+        //TestLoadAssetBundle();
     }
 
     // Update is called once per frame

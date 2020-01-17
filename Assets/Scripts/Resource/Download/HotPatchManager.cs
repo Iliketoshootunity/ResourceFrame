@@ -175,13 +175,15 @@ public class HotPatchManager : Singleton<HotPatchManager>
             if (CheckLocalAndServerInfo())
             {
                 ComputeDownLoadHotAB();
-                //更新本地文件
-                if (File.Exists(m_LocalXMLPath))
+
+                if (File.Exists(m_ServerXMLPath))
                 {
-                    File.Delete(m_LocalXMLPath);
+                    if (File.Exists(m_LocalXMLPath))
+                    {
+                        File.Delete(m_LocalXMLPath);
+                    }
+                    File.Move(m_ServerXMLPath, m_LocalXMLPath);
                 }
-                File.Create(m_LocalXMLPath);
-                File.Copy(m_ServerXMLPath, m_LocalXMLPath);
             }
             else
             {
@@ -364,7 +366,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     {
         //对照这个资源是否需要下载
         string filePath = m_DownloadPath + "/" + patch.Name;
-        if (File.Exists(filePath))
+        if (!File.Exists(filePath))
         {
             //没有说明需要下载
             m_DownLoadPatchList.Add(patch);
