@@ -14,7 +14,7 @@ public class DownloadAssetBundle : DownloadItem
 
     public override IEnumerator Download(Action callBack = null)
     {
-        m_WebRequest = new UnityWebRequest(m_Url);
+        m_WebRequest = UnityWebRequest.Get(m_Url);
         m_WebRequest.timeout = 30;
         yield return m_WebRequest.SendWebRequest();
         if (m_WebRequest.isNetworkError)

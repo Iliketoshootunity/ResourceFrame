@@ -209,7 +209,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// </summary>
     public void ReadLocalVersion()
     {
-        TextAsset versionText = Resources.Load<TextAsset>("Version");
+        TextAsset versionText = Resources.Load<TextAsset>("verison");
         if (versionText == null)
         {
             Debug.LogError("未读取到本地版本");
@@ -234,8 +234,8 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// <param name="callBack"></param>
     private IEnumerator ReadServerXml(Action callBack = null)
     {
-        string xmlUrl = "http://127.0.0.1:80/ServerInfo.xml";
-        UnityWebRequest webRequest = new UnityWebRequest(xmlUrl);
+        string xmlUrl = "http://127.0.0.1/ServerInfo.xml"; 
+        UnityWebRequest webRequest = UnityWebRequest.Get(xmlUrl);
         webRequest.timeout = 300;
         yield return webRequest.SendWebRequest();
         if (webRequest.isNetworkError)
@@ -564,16 +564,26 @@ public class FileTool
 {
     public static void CreateFile(string filePath, byte[] dataBuffer)
     {
+        //if (File.Exists(filePath))
+        //{
+        //    File.Delete(filePath);
+        //}
+        //using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+        //{
+        //    using (StreamWriter sw = new StreamWriter(fs))
+        //    {
+        //        sw.Write(dataBuffer);
+        //    }
+        //}
+
         if (File.Exists(filePath))
         {
             File.Delete(filePath);
         }
-        using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-        {
-            using (StreamWriter sw = new StreamWriter(fs))
-            {
-                sw.Write(dataBuffer);
-            }
-        }
+        FileInfo file = new FileInfo(filePath);
+        Stream stream = file.Create();
+        stream.Write(dataBuffer, 0, dataBuffer.Length);
+        stream.Close();
+        stream.Dispose();
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Serialization;
 
+[System.Serializable]
 public class ServerInfo  {
 
     //服务器的所有版本信息

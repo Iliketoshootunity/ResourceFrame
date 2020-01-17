@@ -21,6 +21,7 @@ public class GameStart : MonoSingleton<GameStart>
         ObjectManager.Instance.Init(spawnTrs, recycleTrs);
         GameMapManager.Instance.Init(this);
         UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
+        HotPatchManager.Instance.CheckVersion(Test);
         //GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
     }
 
@@ -28,6 +29,10 @@ public class GameStart : MonoSingleton<GameStart>
     void Update()
     {
         UIManager.Instance.OnUpdate();
+    }
+    private void Test(bool o)
+    {
+
     }
 
 
