@@ -211,7 +211,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// </summary>
     public void ReadLocalVersion()
     {
-        TextAsset versionText = Resources.Load<TextAsset>("verison");
+        TextAsset versionText = Resources.Load<TextAsset>("version");
         if (versionText == null)
         {
             Debug.LogError("未读取到本地版本");

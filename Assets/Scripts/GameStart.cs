@@ -32,7 +32,9 @@ public class GameStart : MonoSingleton<GameStart>
     }
     private void Test(bool o)
     {
+        StartCoroutine(HotPatchManager.Instance.StartDownload(()=> { 
 
+        }));
     }
 
 
