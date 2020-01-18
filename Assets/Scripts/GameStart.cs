@@ -21,8 +21,12 @@ public class GameStart : MonoSingleton<GameStart>
         ObjectManager.Instance.Init(spawnTrs, recycleTrs);
         GameMapManager.Instance.Init(this);
         UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
-        HotPatchManager.Instance.CheckVersion(Test);
+        //HotPatchManager.Instance.CheckVersion(Test);
+        AssetBundleManager.Instance.LoadAssetBundleConfig();
+        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Attack.prefab");
         //GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
+
+        TestUnPacked();
     }
 
     // Update is called once per frame
@@ -32,8 +36,9 @@ public class GameStart : MonoSingleton<GameStart>
     }
     private void Test(bool o)
     {
-        StartCoroutine(HotPatchManager.Instance.StartDownload(()=> { 
-
+        StartCoroutine(HotPatchManager.Instance.StartDownload(() =>
+        {
+      
         }));
     }
 
@@ -50,6 +55,7 @@ public class GameStart : MonoSingleton<GameStart>
         Debug.Log("加载资源信息");
         AssetBundleManager.Instance.LoadAssetBundleConfig();
         yield return null;
+        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Attack.prefab");
     }
 
     private void RegisterWindow()
@@ -66,6 +72,15 @@ public class GameStart : MonoSingleton<GameStart>
             PouupItem item = go.GetComponent<PouupItem>();
             go.transform.SetParent(UIManager.Instance.UIRoot.transform, false);
             item.Show(title, desc, downloadCallBack, cancelCallBack);
+        }
+    }
+
+    public static void TestUnPacked()
+    {
+        bool isPacked = HotPatchManager.Instance.ComputeUnPackedFile();
+        if (isPacked)
+        {
+            HotPatchManager.Instance.StartUnPacked();
         }
     }
 }

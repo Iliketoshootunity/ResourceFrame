@@ -53,7 +53,7 @@ public class BuildApp
         string version = "Version:" + verison + "|Package:" + package;
         string oneline = "";
         string all = "";
-        string path = Application.dataPath + "/Resources/verison.txt";
+        string path = Application.dataPath + "/Resources/version.txt";
         using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
         {
             using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.UTF8))

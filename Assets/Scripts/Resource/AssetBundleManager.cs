@@ -18,13 +18,31 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// AssetBundleItem类对象池
     /// </summary>
     protected ClassObjectPool<AssetBundleItem> m_AssetBundleItemPool = ObjectManager.Instance.GetOrCreateClassObjectPool<AssetBundleItem>(500);
+
+    protected string PackedABPath
+    {
+        get
+        {
+#if !UNITY_EDITOR && UNITY_ANDROID
+            return Application.persistentDataPath + "/Origin";
+#else
+            return Application.streamingAssetsPath;
+#endif
+        }
+
+
+    }
+
     /// <summary>
     /// 加载AssetBundle config
     /// </summary>
     public bool LoadAssetBundleConfig()
     {
         //反序列化AssetBundle config
-        AssetBundle configAB = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/assetbundleconfig");
+        string hotABPath = HotPatchManager.Instance.ComputeABPath("assetbundleconfig");
+        string fullName = string.IsNullOrEmpty(hotABPath) ? PackedABPath + "/" + "assetbundleconfig" : hotABPath;
+        byte[] buffer = AES.AESFileDecryptBytes(fullName, "xiaohailin");
+        AssetBundle configAB = AssetBundle.LoadFromMemory(buffer);
         if (configAB == null)
         {
             Debug.LogError("AssetBundleconfig的AB包未加载到");
@@ -135,8 +153,9 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
         {
             item = m_AssetBundleItemPool.Spawn(true);
             string hotABPath = HotPatchManager.Instance.ComputeABPath(abName);
-            string fullName = string.IsNullOrEmpty(hotABPath) ? Application.streamingAssetsPath + "/" + abName : hotABPath;
-            item.AssetBundle = AssetBundle.LoadFromFile(fullName);    
+            string fullName = string.IsNullOrEmpty(hotABPath) ? PackedABPath + "/" + abName : hotABPath;
+            byte[] buffer = AES.AESFileDecryptBytes(fullName, "xiaohailin");
+            item.AssetBundle = AssetBundle.LoadFromMemory(buffer);
             if (item.AssetBundle == null)
             {
                 Debug.LogError("未能正确加载AssetBundle,请检查！！！！！");

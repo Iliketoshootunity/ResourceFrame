@@ -2,10 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Networking;
 
+//1.先和本地打包时的ABMD5文件做对比，得到本此热更需要修改的内容
+//2.再和之前下载的文件比，得到真正需要下载的内容
+//3.(解包)安卓平台因为不能用流数据操纵StreamAssets,所有得下载到Application.persistentDataPath +/Origin
 public class HotPatchManager : Singleton<HotPatchManager>
 {
     /// <summary>
@@ -100,7 +104,6 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// 需要下载的个数
     /// </summary>
     private int m_DownloadCount;
-
     /// <summary>
     /// 需要下载的数据大小 KB
     /// </summary>
@@ -130,6 +133,58 @@ public class HotPatchManager : Singleton<HotPatchManager>
         }
     }
 
+
+    ////////////////////////////////////////////
+    //安卓平台解包
+    /// <summary>
+    /// 在包里的MD5
+    /// </summary>
+    private Dictionary<string, ABMD5Base> m_PackedDic = new Dictionary<string, ABMD5Base>();
+    /// <summary>
+    /// 需要解包的文件
+    /// </summary>
+    private List<string> m_UnPackedList = new List<string>();
+    /// <summary>
+    /// 解包后放的资源目录
+    /// </summary>
+    private string m_OriginPath = Application.persistentDataPath + "/Origin";
+    /// <summary>
+    /// 需要解包的大小
+    /// </summary>
+    private float m_UnPackedSize;
+    /// <summary>
+    /// 已经解包的大小
+    /// </summary>
+    private float m_AlreadyUnPackedSize;
+
+    /// <summary>
+    /// 是否开始劫包
+    /// </summary>
+    private bool m_StartUnPacked;
+
+    public float UnPackedSize
+    {
+        get
+        {
+            return m_UnPackedSize;
+        }
+    }
+
+    public float AlreadyUnPackedSize
+    {
+        get
+        {
+            return m_AlreadyUnPackedSize;
+        }
+    }
+
+    public bool GetStartUnPacked
+    {
+        get
+        {
+            return m_StartUnPacked;
+        }
+    }
     /// <summary>
     /// 初始化
     /// </summary>
@@ -137,7 +192,128 @@ public class HotPatchManager : Singleton<HotPatchManager>
     public void Init(MonoBehaviour mono)
     {
         m_Mono = mono;
+        ReadMD5();
     }
+
+    /// <summary>
+    /// 读取MD5
+    /// </summary>
+    public void ReadMD5()
+    {
+        m_PackedDic.Clear();
+        TextAsset amd5Text = Resources.Load<TextAsset>("ABMD5");
+        if (amd5Text == null)
+        {
+            Debug.LogError("ABMD5 读取不到");
+            return;
+        }
+        using (MemoryStream ms = new MemoryStream(amd5Text.bytes))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            ABMD5 md5 = (ABMD5)bf.Deserialize(ms);
+            foreach (var item in md5.ABMD5BaseList)
+            {
+                m_PackedDic.Add(item.Name, item);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 计算需要解包的文件
+    /// </summary>
+    /// <returns></returns>
+    public bool ComputeUnPackedFile()
+    {
+#if !UNITY_EDITOR && UNITY_ANDROID
+        if (!Directory.Exists(m_OriginPath))
+        {
+            Directory.CreateDirectory(m_OriginPath);
+        }
+        m_UnPackedList.Clear();
+        foreach (var item in m_PackedDic)
+        {
+            string filePath = m_OriginPath + "/" + item.Value.Name;
+            if (!File.Exists(filePath))
+            {
+                m_UnPackedList.Add(item.Key);
+            }
+            else
+            {
+                string md5 = MD5Manager.Instance.BuildFileMd5(filePath);
+                if (md5 != item.Value.Md5)
+                {
+                    m_UnPackedList.Add(item.Key);
+                }
+            }
+        }
+
+        foreach (var item in m_PackedDic)
+        {
+            if (m_UnPackedList.Contains(item.Key))
+            {
+                m_UnPackedSize += item.Value.Size;
+            }
+        }
+
+        return m_UnPackedList.Count > 0;
+#else
+        return false;
+#endif
+
+    }
+
+    /// <summary>
+    /// 获取解包进度
+    /// </summary>
+    /// <returns></returns>
+    public float GetUnPackedProgress()
+    {
+        return m_AlreadyUnPackedSize / m_UnPackedSize;
+    }
+    /// <summary>
+    /// 解包
+    /// </summary>
+    public void StartUnPacked()
+    {
+#if !UNITY_EDITOR && UNITY_ANDROID
+        m_StartUnPacked = true;
+        m_Mono.StartCoroutine(StartUnPackedIE());
+#else
+#endif
+    }
+    /// <summary>
+    /// 解包携程
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator StartUnPackedIE()
+    {
+        foreach (var item in m_UnPackedList)
+        {
+            string packedPath = Application.streamingAssetsPath + "/" + item;
+            UnityWebRequest webRequest = UnityWebRequest.Get(packedPath);
+            webRequest.timeout = 300;
+            yield return webRequest.SendWebRequest();
+            if (webRequest.isNetworkError)
+            {
+                Debug.LogError("Start UnPacked Error" + webRequest.error);
+            }
+            else
+            {
+                byte[] buffer = webRequest.downloadHandler.data;
+                FileTool.CreateFile(m_OriginPath + "/" + item, buffer);
+            }
+
+            if (m_PackedDic.ContainsKey(item))
+            {
+                m_AlreadyUnPackedSize += m_PackedDic[item].Size;
+            }
+            webRequest.Dispose();
+        }
+
+        m_StartUnPacked = false;
+    }
+
+
 
     /// <summary>
     /// 检查是否需要热更
@@ -236,7 +412,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// <param name="callBack"></param>
     private IEnumerator ReadServerXml(Action callBack = null)
     {
-        string xmlUrl = "http://127.0.0.1/ServerInfo.xml"; 
+        string xmlUrl = "http://127.0.0.1/ServerInfo.xml";
         UnityWebRequest webRequest = UnityWebRequest.Get(xmlUrl);
         webRequest.timeout = 300;
         yield return webRequest.SendWebRequest();
@@ -453,7 +629,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
                 Debug.LogError(string.Format("{0}未在下载的字段中找到", downloadAssts[i].FileName));
             }
         }
-        if (m_DownloadList.Count < 0)
+        if (m_DownloadList.Count <= 0)
         {
             //下载的文件无误
             if (callBack != null)

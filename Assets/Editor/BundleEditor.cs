@@ -41,6 +41,60 @@ public class BundleEditor
 
     private static Dictionary<string, ABMD5Base> m_ABMD5BaseDir = new Dictionary<string, ABMD5Base>();
 
+
+    [MenuItem("TTT/测试加密")]
+    public static void TestEncrypt()
+    {
+        string filePath = Application.dataPath + "/TestEncrypt.xml";
+        AES.AESFileEncrypt(filePath, "XHL");
+    }
+
+    [MenuItem("TTT/测试解密")]
+    public static void TestDecrypt()
+    {
+        string filePath = Application.dataPath + "/TestEncrypt.xml";
+        AES.AESFileDecrypt(filePath, "XHL");
+    }
+
+
+    /// <summary>
+    /// 加密Ab包
+    /// </summary>
+    [MenuItem("Tool/加密AB")]
+    public static void EncryptAssetBundle()
+    {
+        DirectoryInfo dirInfo = new DirectoryInfo(m_BuildABPath);
+        FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+        foreach (var item in files)
+        {
+            if (item.FullName.EndsWith(".meta") && item.FullName.EndsWith(".manifest"))
+            {
+                continue;
+            }
+            AES.AESFileEncrypt(item.FullName, "xiaohailin");
+        }
+        Debug.Log("加密完成");
+    }
+
+
+    /// <summary>
+    /// 解密Ab包
+    /// </summary>
+    [MenuItem("Tool/解密AB")]
+    public static void DecryptAssetBundle()
+    {
+        DirectoryInfo dirInfo = new DirectoryInfo(m_BuildABPath);
+        FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+        foreach (var item in files)
+        {
+            if (item.FullName.EndsWith(".meta") && item.FullName.EndsWith(".manifest"))
+            {
+                continue;
+            }
+            AES.AESFileDecrypt(item.FullName, "xiaohailin");
+        }
+    }
+
     [MenuItem("Tool/BuildAB")]
     public static void BuildNormal()
     {
@@ -220,7 +274,11 @@ public class BundleEditor
         }
 
         DeleteBuildPathMainfest();
+
+        EncryptAssetBundle();
     }
+
+
 
     /// <summary>
     /// 删除Build路径的Mainfest
@@ -470,6 +528,7 @@ public class BundleEditor
                 continue;
             }
             FileInfo fi = new FileInfo(files[i]);
+            //新增的
             if (!m_ABMD5BaseDir.ContainsKey(fi.Name))
             {
                 changeList.Add(fi.Name);
@@ -479,6 +538,7 @@ public class BundleEditor
                 ABMD5Base md5base = null;
                 if (m_ABMD5BaseDir.TryGetValue(fi.Name, out md5base))
                 {
+                    //改过的
                     string md5 = MD5Manager.Instance.BuildFileMd5(fi.FullName);
                     if (md5base.Md5 != md5)
                     {

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
 
+/// <summary>
+/// 初始打包的AsstBundle信息
+/// </summary>
 [System.Serializable]
 public class ABMD5  {
 
