@@ -9,3 +9,5 @@ Temp/
 .settings/
 *.class
 *.jar
+ProjectSettings/
+Library/

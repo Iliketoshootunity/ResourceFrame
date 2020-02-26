@@ -323,6 +323,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DownloadPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 1536667356333130, guid: 7e8a29a7ddfe10840a252292fe235ce9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 114525035530869728, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -336,17 +340,17 @@ PrefabInstance:
     - target: {fileID: 224086200146240164, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.69
       objectReference: {fileID: 0}
     - target: {fileID: 224086200146240164, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.69
       objectReference: {fileID: 0}
     - target: {fileID: 224086200146240164, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224318465536390968, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
@@ -406,12 +410,12 @@ PrefabInstance:
     - target: {fileID: 224925101419334910, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.69
       objectReference: {fileID: 0}
     - target: {fileID: 224925101419334910, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224933529809270470, guid: 7e8a29a7ddfe10840a252292fe235ce9,
         type: 3}

@@ -21,9 +21,8 @@ public class GameStart : MonoSingleton<GameStart>
         ObjectManager.Instance.Init(spawnTrs, recycleTrs);
         GameMapManager.Instance.Init(this);
         UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
-        //HotPatchManager.Instance.CheckVersion(Test);
+        HotPatchManager.Instance.CheckVersion(Test);
         AssetBundleManager.Instance.LoadAssetBundleConfig();
-        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Attack.prefab");
         //GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
 
         TestUnPacked();

@@ -275,6 +275,7 @@ public class BundleEditor
 
         DeleteBuildPathMainfest();
 
+        //加密AB包
         EncryptAssetBundle();
     }
 
@@ -574,7 +575,7 @@ public class BundleEditor
         DirectoryInfo di = new DirectoryInfo(m_ABHotFixPath);
         FileInfo[] fis = di.GetFiles("*", SearchOption.AllDirectories);
         Patchs patcs = new Patchs();
-        patcs.Version = 1; //自己更改
+        patcs.Version = 2; //自己更改
         patcs.Des = "测试打包";
         patcs.Files = new List<Patch>();
         for (int i = 0; i < fis.Length; i++)

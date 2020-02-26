@@ -1,1 +1,1 @@
-﻿Version:1.0|Package:com.DefaultCompany.ResourceFrame
+﻿Version:2.0|Package:com.DefaultCompany.ResourceFrame

@@ -154,6 +154,7 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
             item = m_AssetBundleItemPool.Spawn(true);
             string hotABPath = HotPatchManager.Instance.ComputeABPath(abName);
             string fullName = string.IsNullOrEmpty(hotABPath) ? PackedABPath + "/" + abName : hotABPath;
+            //解密AB包
             byte[] buffer = AES.AESFileDecryptBytes(fullName, "xiaohailin");
             item.AssetBundle = AssetBundle.LoadFromMemory(buffer);
             if (item.AssetBundle == null)
