@@ -15,7 +15,7 @@ public enum PlatType
 /// </summary>
 public class PhoneManager : Singleton<PhoneManager>
 {
-    public bool IsLogin { get; set; } = false;
+    public bool IsLogin { get; set; }
 
     public Action<PlatType> LoginSuccess;
     public Action<PlatType> LoginFailed;

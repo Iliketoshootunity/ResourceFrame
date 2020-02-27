@@ -16,7 +16,7 @@ public class UIManager : Singleton<UIManager>
     private Camera m_UICamera;
     private EventSystem m_EventSystem;
     private float m_CanvasRate = 0;
-    private string m_UIPrefabPath = "Assets/GameData/Prefab/UGUI/Panel/";
+    private string m_UIPrefabPath = "Assets/GameData/Prefabs/UGUI/Panel/";
 
     private Dictionary<string, System.Type> m_RegisterDir = new Dictionary<string, System.Type>();
     private Dictionary<string, Window> m_WindowDic = new Dictionary<string, Window>();
@@ -28,7 +28,7 @@ public class UIManager : Singleton<UIManager>
         {
             return m_UIRoot;
         }
-        
+
     }
 
 
@@ -143,7 +143,7 @@ public class UIManager : Singleton<UIManager>
     /// <param name="wndName"></param>
     /// <param name="bTop"></param>
     /// <param name="paramList"></param>
-    public Window OpenWindow(string wndName, bool bTop = true, params object[] paramList)
+    public Window OpenWindow(string wndName, bool bTop = true, bool resource = false, params object[] paramList)
     {
         Window wnd = FindWindowByName(wndName);
         if (wnd == null)
@@ -159,7 +159,15 @@ public class UIManager : Singleton<UIManager>
                 wnd = System.Activator.CreateInstance(windowType) as Window;
             }
             string path = m_UIPrefabPath + wndName;
-            GameObject go = ObjectManager.Instance.InstantiateGameObject(path);
+            GameObject go = null;
+            if (resource)
+            {
+                go = GameObject.Instantiate(Resources.Load<GameObject>(wndName.Replace(".prefab", "")));
+            }
+            else
+            {
+                go = ObjectManager.Instance.InstantiateGameObject(path);
+            }
             if (go == null)
             {
                 Debug.LogError(wndName + " 创建失败,找不到资源");
@@ -174,6 +182,7 @@ public class UIManager : Singleton<UIManager>
             wnd.WndName = wndName;
             wnd.OnAwake(paramList);
             go.transform.SetParent(m_WindowRoot.transform);
+            go.transform.localScale = Vector3.one;
             if (bTop)
             {
                 go.transform.SetAsLastSibling();
@@ -199,7 +208,7 @@ public class UIManager : Singleton<UIManager>
     /// <summary>
     /// 关闭窗口
     /// </summary>
-    public void CloseWindow(Window wnd, bool bDestory = false)
+    public void CloseWindow(Window wnd, bool bDestory = false, bool resorce = false)
     {
         if (wnd == null) return;
         if (m_WindowList.Contains(wnd) && m_WindowDic.ContainsValue(wnd))
@@ -209,7 +218,10 @@ public class UIManager : Singleton<UIManager>
 
             wnd.OnDisable();
             wnd.OnClose();
-
+            if (resorce)
+            {
+                GameObject.Destroy(wnd.GameObjcet);
+            }
             if (bDestory)
             {
                 ObjectManager.Instance.ReleseGameObject(wnd.GameObjcet, 0, true);

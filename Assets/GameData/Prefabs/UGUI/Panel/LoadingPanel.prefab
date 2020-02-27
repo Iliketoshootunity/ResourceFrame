@@ -415,6 +415,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224933529809270470}
+  - component: {fileID: 1987151094093695566}
+  - component: {fileID: 7882991438936590175}
   m_Layer: 5
   m_Name: LoadingPanel
   m_TagString: Untagged
@@ -443,6 +445,45 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1987151094093695566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1536667356333130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e122cfa84bf17174fb77b44b561b9045, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LoadingSlider: {fileID: 114721724799742248}
+--- !u!114 &7882991438936590175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1536667356333130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9a64028fe4a3cc4b8f44c3c8ef2869f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Rigi: {fileID: 0}
+  Collider: {fileID: 0}
+  AllPoint: []
+  AllPointChildCount: 
+  AllPointActive: 
+  AllPos: []
+  AllScale: []
+  AllRot: []
+  AllAhchorMax: []
+  AllAnchorMin: []
+  AllPivot: []
+  AllSizeDelta: []
+  AllAnchoredPos: []
+  AllParticle: []
 --- !u!1 &1968214964654836
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,8 +593,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 167.00003}
-  m_SizeDelta: {x: 1550, y: 20}
+  m_AnchoredPosition: {x: -7, y: 115}
+  m_SizeDelta: {x: 799.9, y: 25.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &114721724799742248
 MonoBehaviour:

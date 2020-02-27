@@ -4,28 +4,28 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
 public class GameStart : MonoSingleton<GameStart>
 {
     public RectTransform UIRoot;
     public RectTransform MidleWindowRoot;
     public Camera UICamera;
     public EventSystem EventSystem;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
-        Transform spawnTrs = transform.Find("SpawnTrs");
-        Transform recycleTrs = transform.Find("RecycleTrs");
-        HotPatchManager.Instance.Init(this);
+        ObjectManager.Instance.Init(transform.Find("SpawnTrs"), transform.Find("RecycleTrs"));
+        UIManager.Instance.Init(transform.Find("Canvas") as RectTransform, transform.Find("Canvas/Middle") as RectTransform, transform.Find("Canvas/UICamera").GetComponent<Camera>(), transform.Find("EventSystem").GetComponent<EventSystem>());
         ResourceManager.Instance.Init(this);
-        ObjectManager.Instance.Init(spawnTrs, recycleTrs);
-        GameMapManager.Instance.Init(this);
-        UIManager.Instance.Init(UIRoot, MidleWindowRoot, UICamera, EventSystem);
-        HotPatchManager.Instance.CheckVersion(Test);
-        AssetBundleManager.Instance.LoadAssetBundleConfig();
-        //GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
+        HotPatchManager.Instance.Init(this);
+        RegisterWindow();
+    }
 
-        TestUnPacked();
+    void Start()
+    {
+        UIManager.Instance.OpenWindow(ConStr.DOWNLOAD, true, true);
     }
 
     // Update is called once per frame
@@ -33,13 +33,7 @@ public class GameStart : MonoSingleton<GameStart>
     {
         UIManager.Instance.OnUpdate();
     }
-    private void Test(bool o)
-    {
-        StartCoroutine(HotPatchManager.Instance.StartDownload(() =>
-        {
-      
-        }));
-    }
+
 
 
     private void OnApplicationQuit()
@@ -49,16 +43,36 @@ public class GameStart : MonoSingleton<GameStart>
 #endif
     }
 
-    public IEnumerator StartGame()
+    public IEnumerator StartGame(Slider slider, Text text)
     {
-        Debug.Log("加载资源信息");
-        AssetBundleManager.Instance.LoadAssetBundleConfig();
+        slider.value = 0;
         yield return null;
-        ObjectManager.Instance.InstantiateGameObject("Assets/GameData/Prefabs/Attack.prefab");
+        text.text = "加载本地数据";
+        AssetBundleManager.Instance.LoadAssetBundleConfig();
+        slider.value = 0.1f;
+        yield return null;
+        text.text = "加载dll";
+        //
+        slider.value = 0.2f;
+        yield return null;
+        text.text = "加载数据表";
+        //
+        slider.value = 0.5f;
+        yield return null;
+        text.text = "加载配置";
+        //
+        slider.value = 0.9f;
+        yield return null;
+        text.text = "初始化地图";
+        GameMapManager.Instance.Init(this);
+        slider.value = 1f;
+        yield return null;
+        GameMapManager.Instance.LoadScene(ConStr.MENUSCENE);
     }
 
     private void RegisterWindow()
     {
+        UIManager.Instance.RegisterWindow<DownloadWindow>(ConStr.DOWNLOAD);
         UIManager.Instance.RegisterWindow<LoadingWindow>(ConStr.LOADINGPANEL);
         UIManager.Instance.RegisterWindow<MenuWindow>(ConStr.MENUPANEL);
     }
@@ -79,8 +93,16 @@ public class GameStart : MonoSingleton<GameStart>
         bool isPacked = HotPatchManager.Instance.ComputeUnPackedFile();
         if (isPacked)
         {
-            HotPatchManager.Instance.StartUnPacked();
+
         }
+    }
+
+    private void Test(bool o)
+    {
+        StartCoroutine(HotPatchManager.Instance.StartDownload(() =>
+        {
+
+        }));
     }
 }
 

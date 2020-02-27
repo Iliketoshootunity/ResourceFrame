@@ -163,6 +163,7 @@
     <Compile Include="Assets\Scripts\GameMap\ConStr.cs" />
     <Compile Include="Assets\Scripts\GameMap\GameMapManager.cs" />
     <Compile Include="Assets\Scripts\GameStart.cs" />
+    <Compile Include="Assets\Scripts\HotFix_Code\ILRuntimeManager.cs" />
     <Compile Include="Assets\Scripts\MenuMode.cs" />
     <Compile Include="Assets\Scripts\PlatformSDK\PhoneManager.cs" />
     <Compile Include="Assets\Scripts\PlatformSDK\PlatformManager.cs" />
@@ -410,6 +411,9 @@
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>G:/WorkSoftward/Unity/Unity2019.2.17f1/Editor/Data/Managed/UnityEngine/UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="HotFix">
+      <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/GameData/Code/HotFix.dll</HintPath>
     </Reference>
     <Reference Include="LitJson">
       <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/Plugins/LitJson.dll</HintPath>

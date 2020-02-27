@@ -271,13 +271,14 @@ public class HotPatchManager : Singleton<HotPatchManager>
         return m_AlreadyUnPackedSize / m_UnPackedSize;
     }
     /// <summary>
-    /// 解包
+    /// 解包(只有安卓需要解包)
+    /// 因为android读取StreamingAssets只能用www/UnityWebRequest
     /// </summary>
-    public void StartUnPacked()
+    public void StartUnPacked(Action callBack)
     {
 #if !UNITY_EDITOR && UNITY_ANDROID
         m_StartUnPacked = true;
-        m_Mono.StartCoroutine(StartUnPackedIE());
+        m_Mono.StartCoroutine(StartUnPackedIE(callBack));
 #else
 #endif
     }
@@ -285,7 +286,7 @@ public class HotPatchManager : Singleton<HotPatchManager>
     /// 解包携程
     /// </summary>
     /// <returns></returns>
-    private IEnumerator StartUnPackedIE()
+    private IEnumerator StartUnPackedIE(Action callBack)
     {
         foreach (var item in m_UnPackedList)
         {
@@ -311,6 +312,11 @@ public class HotPatchManager : Singleton<HotPatchManager>
         }
 
         m_StartUnPacked = false;
+
+        if (callBack != null)
+        {
+            callBack();
+        }
     }
 
 

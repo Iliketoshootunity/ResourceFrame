@@ -28,7 +28,7 @@ public class GameMapManager : Singleton<GameMapManager>
     {
         LoadingProgress = 0;
         m_Mono.StartCoroutine(LoadSceneAsync(sceneName));
-        UIManager.Instance.OpenWindow(ConStr.LOADINGPANEL, true, sceneName);
+        UIManager.Instance.OpenWindow(ConStr.LOADINGPANEL, true,false, sceneName);
     }
 
     /// <summary>

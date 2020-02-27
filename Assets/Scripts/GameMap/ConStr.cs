@@ -6,6 +6,7 @@ public class ConStr
 {
     public static string LOADINGPANEL = "LoadingPanel.prefab";
     public static string MENUPANEL = "MenuPanel.prefab";
+    public static string DOWNLOAD = "DownloadPanel.prefab";
 
     public static string EMPTYSCENE = "Empty";
     public const string MENUSCENE = "Menu";

@@ -11,7 +11,7 @@ public class MenuWindow : Window
     {
         base.OnAwake(paramList);
         MenuPanel = GameObjcet.GetComponent<MenuPanel>();
-        AsyncChangeImageSprite("Assets/GameData/Texture/Test1.png", MenuPanel.Sprite1);
+        AsyncChangeImageSprite("Assets/GameData/UGUI/Test1.png", MenuPanel.Sprite1);
 
         PhoneManager.Instance.LoginSuccess += LoginSuccessCallBack;
         PhoneManager.Instance.LoginFailed += LoginFailedCallBack;

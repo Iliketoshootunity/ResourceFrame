@@ -12,4 +12,7 @@
   <ABList AssetName="Xray.shader" ABName="shader" Crc="2720758644" path="Assets/GameData/Shaders/Xray.shader" />
   <ABList AssetName="TestUI1.prefab" ABName="testui1" Crc="278141864" path="Assets/GameData/Prefabs/UGUI/TestUI1.prefab" />
   <ABList AssetName="TestUI2.prefab" ABName="testui2" Crc="2652576843" path="Assets/GameData/Prefabs/UGUI/TestUI2.prefab" />
+  <ABList AssetName="Test1.png" ABName="ugui" Crc="3547477655" path="Assets/GameData/UGUI/Test1.png" />
+  <ABList AssetName="test2.png" ABName="ugui" Crc="371445476" path="Assets/GameData/UGUI/test2.png" />
+  <ABList AssetName="test3.png" ABName="ugui" Crc="725870420" path="Assets/GameData/UGUI/test3.png" />
 </AssetBundleConfig>
