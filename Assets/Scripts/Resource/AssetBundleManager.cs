@@ -38,6 +38,10 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// </summary>
     public bool LoadAssetBundleConfig()
     {
+#if UNITY_EDITOR
+        if (ResourceManager.Instance.LoadAssetFormEditor)
+            return false;
+#endif
         //反序列化AssetBundle config
         string hotABPath = HotPatchManager.Instance.ComputeABPath("assetbundleconfig");
         string fullName = string.IsNullOrEmpty(hotABPath) ? PackedABPath + "/" + "assetbundleconfig" : hotABPath;
@@ -135,7 +139,9 @@ public class AssetBundleManager : Singleton<AssetBundleManager>
     /// <returns></returns>
     public ResourceItem FindResourceItem(uint pathCrc)
     {
-        return m_ResourceItemDic[pathCrc];
+        ResourceItem item = null;
+        m_ResourceItemDic.TryGetValue(pathCrc, out item);
+        return item;
     }
 
 

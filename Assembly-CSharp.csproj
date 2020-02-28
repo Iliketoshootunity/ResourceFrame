@@ -197,8 +197,10 @@
     <Compile Include="Assets\Scripts\Util\CRC32.cs" />
     <None Include="Assets\Resources\version.txt" />
     <None Include="Assets\GameData\Data\Xml\MonsterData.xml" />
+    <None Include="Assets\GameData\Code\HotFix.pdb.txt" />
     <None Include="Assets\GameData\Shaders\Water.shader" />
     <None Include="Assets\GameData\Data\Xml\BuffData.xml" />
+    <None Include="Assets\GameData\Code\HotFix.dll.txt" />
     <None Include="Assets\TestEncrypt.xml" />
     <None Include="Assets\GameData\Shaders\benghuai.shader" />
     <None Include="Assets\GameData\Modle\benghuai\cloud.shader" />
@@ -411,9 +413,6 @@
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>G:/WorkSoftward/Unity/Unity2019.2.17f1/Editor/Data/Managed/UnityEngine/UnityEngine.XRModule.dll</HintPath>
-    </Reference>
-    <Reference Include="HotFix">
-      <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/GameData/Code/HotFix.dll</HintPath>
     </Reference>
     <Reference Include="LitJson">
       <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/Plugins/LitJson.dll</HintPath>

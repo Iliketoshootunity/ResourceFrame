@@ -67,6 +67,7 @@
     <Compile Include="Assets\Editor\BundleEditor.cs" />
     <Compile Include="Assets\Editor\BundleHotFix.cs" />
     <Compile Include="Assets\Editor\OfflineDataEditor.cs" />
+    <Compile Include="Assets\Editor\TestEditor.cs" />
     <Compile Include="Assets\ILRuntime\Adapters\Editor\ILRuntimeCLRBinding.cs" />
     <Reference Include="UnityEditor.TestRunner">
       <HintPath>H:/UnityWorkSpace/ResourceFrame/Library/ScriptAssemblies/UnityEditor.TestRunner.dll</HintPath>
@@ -295,9 +296,6 @@
     </Reference>
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>C:/Program Files (x86)/Microsoft Visual Studio Tools for Unity/15.0/Editor/SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
-    </Reference>
-    <Reference Include="HotFix">
-      <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/GameData/Code/HotFix.dll</HintPath>
     </Reference>
     <Reference Include="LitJson">
       <HintPath>H:/UnityWorkSpace/ResourceFrame/Assets/Plugins/LitJson.dll</HintPath>

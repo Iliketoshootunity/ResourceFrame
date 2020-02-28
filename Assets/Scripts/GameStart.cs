@@ -8,10 +8,11 @@ using UnityEngine.UI;
 
 public class GameStart : MonoSingleton<GameStart>
 {
-    public RectTransform UIRoot;
-    public RectTransform MidleWindowRoot;
-    public Camera UICamera;
-    public EventSystem EventSystem;
+    public bool LoadAssetFormEditor = true;
+    private RectTransform UIRoot;
+    private RectTransform MidleWindowRoot;
+    private Camera UICamera;
+    private EventSystem EventSystem;
 
     private void Awake()
     {
@@ -19,8 +20,10 @@ public class GameStart : MonoSingleton<GameStart>
         ObjectManager.Instance.Init(transform.Find("SpawnTrs"), transform.Find("RecycleTrs"));
         UIManager.Instance.Init(transform.Find("Canvas") as RectTransform, transform.Find("Canvas/Middle") as RectTransform, transform.Find("Canvas/UICamera").GetComponent<Camera>(), transform.Find("EventSystem").GetComponent<EventSystem>());
         ResourceManager.Instance.Init(this);
+        ResourceManager.Instance.LoadAssetFormEditor = LoadAssetFormEditor;
         HotPatchManager.Instance.Init(this);
         RegisterWindow();
+
     }
 
     void Start()
@@ -52,7 +55,7 @@ public class GameStart : MonoSingleton<GameStart>
         slider.value = 0.1f;
         yield return null;
         text.text = "加载dll";
-        //
+        ILRuntimeManager.Instance.Init();
         slider.value = 0.2f;
         yield return null;
         text.text = "加载数据表";

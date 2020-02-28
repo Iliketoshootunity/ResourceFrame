@@ -132,6 +132,18 @@ public class ResourceManager : Singleton<ResourceManager>
 
     protected bool m_LoadAssetFormEditor = false;
 
+    public bool LoadAssetFormEditor
+    {
+        get
+        {
+            return m_LoadAssetFormEditor;
+        }
+        set {
+            m_LoadAssetFormEditor = value;
+        }
+
+    }
+
     //缓存的资源 key是path crc value 是ResourceItem
     public Dictionary<uint, ResourceItem> AssetDic = new Dictionary<uint, ResourceItem>();
     //缓存引用计数为零的资源列表，达到缓存最大的时候释放这个列表里面最早没用的资源

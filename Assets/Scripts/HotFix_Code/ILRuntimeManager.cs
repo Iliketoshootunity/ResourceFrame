@@ -7,8 +7,8 @@ using System.IO;
 public class ILRuntimeManager : Singleton<ILRuntimeManager>
 {
     private AppDomain m_AppDomain;
-    private const string DLLPATH= "Assets/GameData/HotCode/HotFix.dll.txt";
-    private const string PDBPath = "Assets/GameData/HotCode/HotFix.pdb.txt";
+    private const string DLLPATH= "Assets/GameData/Code/HotFix.dll.txt";
+    private const string PDBPath = "Assets/GameData/Code/HotFix.pdb.txt";
     public AppDomain AppDomain
     {
         get
@@ -45,6 +45,9 @@ public class ILRuntimeManager : Singleton<ILRuntimeManager>
     /// </summary>
     private void OnHotFixLoad()
     {
+        //第一种简单方法的调用
+        m_AppDomain.Invoke("HotFix.TestClass", "TestClassStaticFunction", null, null);
 
+        //先单独获取类
     }
 }
